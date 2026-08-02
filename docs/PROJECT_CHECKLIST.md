@@ -79,6 +79,9 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 
 ## Blockchain / Contracts
 
+- [ ] Resolve stylus-sdk 0.9.2 `cargo build` const-eval panic (ruint 
+      to_be_bytes) before implementing real contract logic — see 
+      contracts/README.md § Known Issues
 - [ ] Set up local Stylus dev environment (Cargo, `cargo stylus`, local node)
 - [ ] Define `CreatorRegistry` interface (see `SMART_CONTRACT_INTERFACES.md`)
 - [ ] Define `AssetRegistry` interface
