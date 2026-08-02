@@ -145,6 +145,7 @@ vite.config.ts.timestamp-*
 # Rust / Stylus (contracts/)
 target/
 Cargo.lock
+!/contracts/Cargo.lock
 
 # OS
 .DS_Store
