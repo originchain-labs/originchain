@@ -1,10 +1,12 @@
 # OriginChain — Development Roadmap
 
-Eight phases, ordered by dependency. Each phase lists its goal, deliverables, dependencies, and what "done" means.
+Eleven phases, ordered by dependency, reflecting the revised implementation order adopted during Phase 0 kickoff (frontend/backend skeleton and wallet auth were moved earlier than in the original draft, since wallet auth is the foundation every other feature depends on). Each phase lists its goal, deliverables, dependencies, and what "done" means.
+
+**Status key:** ✅ Complete · 🔶 In Progress · ⬜ Not Started
 
 ---
 
-## Phase 0 — Foundation
+## Phase 0 — Foundation ✅
 
 **Goal:** A working, empty scaffold every developer can build on without setup friction.
 
@@ -13,120 +15,157 @@ Eight phases, ordered by dependency. Each phase lists its goal, deliverables, de
 - `packages/shared-types` and `packages/config` initialized
 - `.env.example` files in place
 - Local dev instructions runnable by all 3 devs
+- Four Stylus contract skeletons compiling cleanly (interfaces only, no logic)
 
 **Dependencies:** None — this is the starting point.
 
-**Completion Criteria:** All 3 developers can `git clone`, install, and run frontend + backend locally with placeholder pages/endpoints.
+**Completion Criteria:** All 3 developers can `git clone`, install, and run frontend + backend locally with placeholder pages/endpoints. ✅ Met.
 
 ---
 
-## Phase 1 — Infrastructure
+## Phase 1 — Frontend + Backend Skeleton ✅
 
-**Goal:** Core plumbing — database, IPFS, local contract dev environment — all reachable.
+**Goal:** Both apps installed, running, and reachable — no real screens or endpoints yet, just verified infrastructure.
 
 **Deliverables:**
-- PostgreSQL schema migrated (per `DATABASE_SCHEMA.md`)
-- Pinata integration verified (pin + retrieve round-trip)
-- Local Stylus dev environment running, contracts compiling as stubs
+- Next.js + TypeScript + Tailwind + shadcn/ui + Framer Motion installed and verified (`apps/frontend`)
+- Express + TypeScript + Prisma + PostgreSQL + Zod installed and verified (`apps/backend`)
+- Local PostgreSQL connected, Prisma Client generation confirmed
 
 **Dependencies:** Phase 0.
 
-**Completion Criteria:** A test file can be pinned to IPFS and retrieved; Prisma can read/write to Postgres; a stub contract deploys to a local/test node.
+**Completion Criteria:** `pnpm dev` runs both apps cleanly; backend confirmed connected to a real local database. ✅ Met.
 
 ---
 
-## Phase 2 — Wallet Authentication
+## Phase 2 — Wallet Authentication ✅
 
-**Goal:** End-to-end wallet-based session auth.
+**Goal:** End-to-end wallet-based session auth — the foundation every other feature builds on.
 
 **Deliverables:**
-- RainbowKit/Wagmi/Viem wired into frontend
-- `/auth/nonce` + `/auth/verify` backend endpoints
-- Session persistence in frontend
+- RainbowKit/Wagmi/Viem wired into frontend, Arbitrum chains configured
+- Wallet connect UI with cookie-based session persistence (no reload flash)
+- SIWE (Sign-In With Ethereum) message signing flow
+- `/auth/nonce` + `/auth/verify` backend endpoints, with single-use/expiring nonces and JWT session tokens
+- CORS configured to allow the frontend origin
 
-**Dependencies:** Phase 0 (scaffold), Phase 1 (backend running).
+**Dependencies:** Phase 1.
 
-**Completion Criteria:** A user can connect a wallet, sign a message, and reach an authenticated frontend state backed by a real session token.
+**Completion Criteria:** A user can connect a wallet, sign a SIWE message, and reach an authenticated frontend state backed by a real session token that persists across reloads. ✅ Met.
 
 ---
 
-## Phase 3 — Creator Profiles
+## Phase 3 — Creator Profile 🔶 *(next up)*
 
 **Goal:** First full vertical slice: wallet → contract → database → UI.
 
 **Deliverables:**
-- `CreatorRegistry` implemented and deployed to testnet
+- `CreatorRegistry` contract logic implemented (currently an empty compiling skeleton) + unit tests, deployed to Arbitrum Sepolia
+- `creators` table in Prisma schema, migrated
 - Creator profile creation/edit flow (frontend + backend)
 - Indexer worker reconciling `CreatorRegistered` events into Postgres
 
-**Dependencies:** Phase 1 (infra), Phase 2 (auth).
+**Dependencies:** Phase 2 (auth required to know who's creating a profile).
 
-**Completion Criteria:** A creator can connect a wallet, submit a profile, see it registered on-chain (testnet explorer), and see it reflected in the app via the indexer — without manual DB intervention.
+**Completion Criteria:** An authenticated creator can submit a profile, see it registered on-chain (testnet explorer), and see it reflected in the app via the indexer — without manual DB intervention.
 
 ---
 
-## Phase 4 — Asset Registration
+## Phase 4 — IPFS Integration ⬜
+
+**Goal:** Off-chain storage layer working, ready for asset registration to build on.
+
+**Deliverables:**
+- Pinata account + API keys configured
+- `Storage Service` (`services/storage/`) with Pinata provider implementation
+- Pin-file and pin-JSON backend helpers
+- CID retrieval verified via public gateway
+- Metadata versioning (`version`/`schema` fields) applied to pinned JSON
+
+**Dependencies:** Phase 3 (profile avatars are the first real use of pinning, even before assets).
+
+**Completion Criteria:** A file and a JSON metadata document can each be pinned and retrieved round-trip through our backend, not just directly through Pinata's own tools.
+
+---
+
+## Phase 5 — Asset Registration ⬜
 
 **Goal:** The core product feature — proof-of-origin registration.
 
 **Deliverables:**
-- `AssetRegistry` implemented and deployed
-- Client-side hashing utility
+- `AssetRegistry` contract logic implemented + unit tests, deployed
+- Client-side content hashing utility
 - Asset upload → AI metadata suggestion → IPFS pin → on-chain registration flow, fully wired
+- Proof of Origin Certificate generation
 - Asset portfolio/browse pages
 
-**Dependencies:** Phase 3 (requires registered creators).
+**Dependencies:** Phase 3 (registered creators), Phase 4 (IPFS working).
 
 **Completion Criteria:** A registered creator can upload a file, see a computed hash, get AI-suggested metadata, edit it, and complete an on-chain registration that's queryable afterward.
 
 ---
 
-## Phase 5 — Verification
+## Phase 6 — Verification ⬜
 
 **Goal:** Public, wallet-free proof verification — the trust-building feature for non-technical visitors and judges.
 
 **Deliverables:**
-- Public verification page (`/verify`)
+- Public verification page (`/verify`), no wallet required
 - `GET /assets/verify` endpoint
 - Clear match/no-match UI with on-chain timestamp + creator display
 
-**Dependencies:** Phase 4 (requires registered assets to verify against).
+**Dependencies:** Phase 5 (requires registered assets to verify against).
 
 **Completion Criteria:** Any visitor, without a wallet, can upload/reference a file and get an accurate verified/not-verified result referencing on-chain data.
 
 ---
 
-## Phase 6 — Reviews & Reputation
+## Phase 7 — Reviews ⬜
 
-**Goal:** Social trust layer on top of registered assets.
+**Goal:** Sybil-resistant review layer on registered assets.
 
 **Deliverables:**
-- `ReviewRegistry` and `ReputationManager` implemented and deployed
+- `ReviewRegistry` contract logic implemented + unit tests, deployed
 - Review submission + display UI
-- Reputation score display on creator profiles
+- Backend `/reviews` endpoints
 
-**Dependencies:** Phase 4 (assets to review), Phase 3 (registered creators as reviewers).
+**Dependencies:** Phase 5 (assets to review), Phase 3 (registered creators as reviewers).
 
-**Completion Criteria:** A second registered creator can review an asset, and the reviewed creator's reputation score updates and displays correctly.
+**Completion Criteria:** A second registered creator can review an asset, and the review is visible on the asset's page, backed by the on-chain record.
 
 ---
 
-## Phase 7 — AI Features
+## Phase 8 — Reputation ⬜
 
-**Goal:** Deepen the AI layer beyond basic tagging (already partially delivered in Phase 4).
+**Goal:** Aggregate trust score built from asset and review activity.
+
+**Deliverables:**
+- `ReputationManager` contract logic implemented + unit tests, deployed
+- Reputation score display on creator profiles
+- Backend `/reputation` endpoint, cached score in Postgres
+
+**Dependencies:** Phase 7 (review data to aggregate).
+
+**Completion Criteria:** A creator's reputation score updates correctly as they register assets and receive reviews, and displays accurately on their profile.
+
+---
+
+## Phase 9 — AI Features ⬜
+
+**Goal:** Deepen the AI layer beyond basic metadata tagging (first introduced in Phase 5).
 
 **Deliverables:**
 - Improved metadata generation prompt quality
 - AI-assisted analytics summaries on creator dashboards
 - Guardrails (cost limits, human-in-the-loop confirmation everywhere)
 
-**Dependencies:** Phase 4 (basic AI integration exists), Phase 6 (data to summarize).
+**Dependencies:** Phase 5 (basic AI integration exists), Phase 8 (data to summarize).
 
 **Completion Criteria:** AI suggestions are consistently useful (qualitatively assessed by the team) and dashboards show AI-generated summaries alongside raw analytics.
 
 ---
 
-## Phase 8 — Deployment
+## Phase 10 — Deployment ⬜
 
 **Goal:** Stable, demo-ready deployed environment.
 
@@ -146,15 +185,18 @@ Eight phases, ordered by dependency. Each phase lists its goal, deliverables, de
 
 ```mermaid
 flowchart TD
-    P0[Phase 0: Foundation] --> P1[Phase 1: Infrastructure]
-    P1 --> P2[Phase 2: Wallet Auth]
-    P2 --> P3[Phase 3: Creator Profiles]
-    P3 --> P4[Phase 4: Asset Registration]
-    P4 --> P5[Phase 5: Verification]
-    P4 --> P6[Phase 6: Reviews & Reputation]
-    P3 --> P6
-    P4 --> P7[Phase 7: AI Features]
-    P6 --> P7
-    P5 --> P8[Phase 8: Deployment]
-    P7 --> P8
+    P0[Phase 0: Foundation done] --> P1[Phase 1: Frontend+Backend Skeleton done]
+    P1 --> P2[Phase 2: Wallet Auth done]
+    P2 --> P3[Phase 3: Creator Profile in progress]
+    P3 --> P4[Phase 4: IPFS Integration]
+    P3 --> P5[Phase 5: Asset Registration]
+    P4 --> P5
+    P5 --> P6[Phase 6: Verification]
+    P5 --> P7[Phase 7: Reviews]
+    P3 --> P7
+    P7 --> P8[Phase 8: Reputation]
+    P5 --> P9[Phase 9: AI Features]
+    P8 --> P9
+    P6 --> P10[Phase 10: Deployment]
+    P9 --> P10
 ```
