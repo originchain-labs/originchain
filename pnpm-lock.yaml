@@ -13,6 +13,9 @@ importers:
       '@prisma/client':
         specifier: ^7.9.1
         version: 7.9.1(prisma@7.9.1(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3))(typescript@5.9.3)
+      cors:
+        specifier: ^2.8.6
+        version: 2.8.6
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
@@ -29,6 +32,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
       '@types/express':
         specifier: ^5.0.6
         version: 5.0.6
@@ -86,6 +92,9 @@ importers:
       shadcn:
         specifier: ^4.16.1
         version: 4.16.1(typescript@5.9.3)
+      siwe:
+        specifier: ^3.0.0
+        version: 3.0.0(ethers@6.17.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -1716,6 +1725,9 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
+
+  '@types/cors@2.8.19':
+    resolution: {integrity: sha512-mFNylyeyqN93lfe/9CSxOGREz8cpzAhH+E93xJ4xWQf62V8sQ/24reV2nyzUWM6H6Xji+GGHpkbLe7pVoUEskg==}
 
   '@types/d3-array@3.0.3':
     resolution: {integrity: sha512-Reoy+pKnvsksN0lQUlcH6dOGjRZ/3WRwXR//m+/8lt1BXeI4xyaUZoqULNjyXXRuh0Mj4LNpkCvhUpQlY3X5xQ==}
@@ -7497,6 +7509,10 @@ snapshots:
       '@types/node': 20.19.43
 
   '@types/connect@3.4.38':
+    dependencies:
+      '@types/node': 20.19.43
+
+  '@types/cors@2.8.19':
     dependencies:
       '@types/node': 20.19.43
 
