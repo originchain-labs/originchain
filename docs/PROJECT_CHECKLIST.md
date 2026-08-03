@@ -4,23 +4,23 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 
 ## Repository
 
-- [ ] Create `apps/`, `contracts/`, `packages/`, `docs/`, `scripts/` top-level folders
-- [ ] Initialize npm/pnpm workspace at root (`package.json` with `workspaces`)
-- [ ] Initialize Cargo workspace at `contracts/Cargo.toml`
-- [ ] Add root `.gitignore` (Node, Rust/Stylus, env files — see `REPOSITORY_STRUCTURE.md`)
-- [ ] Add `packages/shared-types` package skeleton
-- [ ] Add `packages/config` (shared tsconfig, eslint, prettier)
-- [ ] Add root `README.md` linking to `docs/DEVELOPER_KICKOFF_BLUEPRINT.md`
+- [x] Create `apps/`, `contracts/`, `packages/`, `docs/`, `scripts/` top-level folders
+- [x] Initialize npm/pnpm workspace at root (`package.json` with `workspaces`)
+- [x] Initialize Cargo workspace at `contracts/Cargo.toml`
+- [x] Add root `.gitignore` (Node, Rust/Stylus, env files — see `REPOSITORY_STRUCTURE.md`)
+- [x] Add `packages/shared-types` package skeleton
+- [x] Add `packages/config` (shared tsconfig, eslint, prettier)
+- [x] Add root `README.md` linking to `docs/DEVELOPER_KICKOFF_BLUEPRINT.md`
 - [ ] Add `.env.example` files per app
 
 ## Frontend
 
-- [ ] Scaffold Next.js app in `apps/frontend` (TypeScript, App Router)
-- [ ] Install Tailwind CSS + configure design tokens
-- [ ] Install shadcn/ui, initialize component library
-- [ ] Install Framer Motion
-- [ ] Install RainbowKit + Wagmi + Viem, configure Arbitrum chains (mainnet + testnet)
-- [ ] Build wallet connect flow (connect, disconnect, session persistence)
+- [x] Scaffold Next.js app in `apps/frontend` (TypeScript, App Router)
+- [x] Install Tailwind CSS + configure design tokens
+- [x] Install shadcn/ui, initialize component library
+- [x] Install Framer Motion
+- [x] Install RainbowKit + Wagmi + Viem, configure Arbitrum chains (mainnet + testnet)
+- [x] Build wallet connect flow (connect, disconnect, session persistence)
 - [ ] Scaffold routing for all 16 screens (placeholder pages first)
 - [ ] Build shared layout components (nav, footer, auth-gated wrapper)
 - [ ] Build creator onboarding form
@@ -39,9 +39,9 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 
 ## Backend
 
-- [ ] Scaffold Express app in `apps/backend` (TypeScript)
-- [ ] Set up Prisma, connect to PostgreSQL
-- [ ] Implement wallet-signature session auth (nonce + verify, with expiry + single-use)
+- [x] Scaffold Express app in `apps/backend` (TypeScript)
+- [x] Set up Prisma, connect to PostgreSQL
+- [x] Implement wallet-signature session auth (nonce + verify, with expiry + single-use)
 - [ ] Build `routes/` → `controllers/` → `validators/` layering per resource
 - [ ] Build `/api/v1/creators` endpoints (see `API_SPECIFICATION.md`)
 - [ ] Build `/api/v1/assets` endpoints
@@ -73,20 +73,17 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 ## Wallet
 
 - [ ] Configure supported wallets (MetaMask, WalletConnect, Coinbase Wallet at minimum)
-- [ ] Implement sign-in-with-Ethereum-style message signing for session auth
+- [x] Implement sign-in-with-Ethereum-style message signing for session auth
 - [ ] Handle network switching prompt (force Arbitrum)
 - [ ] Handle disconnect/session expiry gracefully in UI
 
 ## Blockchain / Contracts
 
-- [ ] Resolve stylus-sdk 0.9.2 `cargo build` const-eval panic (ruint 
-      to_be_bytes) before implementing real contract logic — see 
-      contracts/README.md § Known Issues
-- [ ] Set up local Stylus dev environment (Cargo, `cargo stylus`, local node)
-- [ ] Define `CreatorRegistry` interface (see `SMART_CONTRACT_INTERFACES.md`)
-- [ ] Define `AssetRegistry` interface
-- [ ] Define `ReviewRegistry` interface
-- [ ] Define `ReputationManager` interface
+- [x] Set up local Stylus dev environment (Cargo, `cargo stylus`, local node)
+- [x] Define `CreatorRegistry` interface (see `SMART_CONTRACT_INTERFACES.md`)
+- [x] Define `AssetRegistry` interface
+- [x] Define `ReviewRegistry` interface
+- [x] Define `ReputationManager` interface
 - [ ] Implement `CreatorRegistry` logic + unit tests
 - [ ] Implement `AssetRegistry` logic + unit tests
 - [ ] Implement `ReviewRegistry` logic + unit tests
@@ -123,7 +120,7 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 - [ ] Add basic abuse/spam protection on review submission (rate limit + wallet-based)
 - [ ] Enforce nonce expiration (5 min) and single-use on `/auth/nonce` + `/auth/verify`
 - [ ] Add Helmet + Content Security Policy
-- [ ] Restrict CORS to deployed frontend origin(s), no wildcard
+- [x] Restrict CORS to deployed frontend origin(s), no wildcard
 - [ ] Validate required env vars at startup (fail fast if missing)
 - [ ] Confirm no secret values ever appear in logs
 
