@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import creatorRoutes from "./routes/creator.routes.js";
+import { startCreatorIndexer } from "./indexer/creator-indexer.js";
 
 const app = express();
 
@@ -26,3 +27,4 @@ app.listen(PORT, () => {
 });
 
 app.use("/api/v1/creators", creatorRoutes);
+startCreatorIndexer();
