@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
-import { pinJSON } from "./storage/pinata.service.js";
+import { storageService } from "./storage/index.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -21,7 +21,7 @@ export async function createCreatorProfile(
         bio: data.bio ?? "",
         avatarCid: data.avatarCid ?? "",
     };
-    const profileCid = await pinJSON(profileMetadata);
+    const { cid: profileCid } = await storageService.pinJSON(profileMetadata);
 
     const creator = await prisma.creator.create({
         data: {
