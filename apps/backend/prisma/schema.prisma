@@ -11,3 +11,16 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Creator {
+  id             String   @id @default(uuid())
+  walletAddress  String   @unique @db.VarChar(42)
+  displayName    String   @db.VarChar(100)
+  bio            String?
+  avatarCid      String?  @db.VarChar(100)
+  organizationId String?
+  createdAt      DateTime @default(now())
+
+  @@map("creators")
+  @@index([walletAddress])
+}
