@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
+import creatorRoutes from "./routes/creator.routes.js";
 
 const app = express();
 
@@ -23,3 +24,5 @@ app.get("/", (_req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend listening on port ${PORT}`);
 });
+
+app.use("/api/v1/creators", creatorRoutes);
