@@ -7,6 +7,11 @@
     "engines": {
         "node": ">=20.0.0"
     },
+    "pnpm": {
+        "overrides": {
+            "dotenv": "16.4.5"
+        }
+    },
     "scripts": {
         "dev:frontend": "pnpm --filter frontend dev",
         "dev:backend": "pnpm --filter backend dev",
