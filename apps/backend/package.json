@@ -13,6 +13,7 @@
   "author": "",
   "license": "UNLICENSED",
   "dependencies": {
+    "@originchain/shared-types": "workspace:*",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "cors": "^2.8.6",
@@ -21,6 +22,7 @@
     "jsonwebtoken": "^9.0.3",
     "pinata": "^2.5.6",
     "siwe": "^3.0.0",
+    "viem": "2.x",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -30,7 +32,6 @@
     "@types/node": "^20",
     "prisma": "^7.9.1",
     "tsx": "^4.23.4",
-    "typescript": "^5",
-    "viem": "2.x"
+    "typescript": "^5"
   }
 }

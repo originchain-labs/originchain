@@ -13,6 +13,9 @@ importers:
 
   apps/backend:
     dependencies:
+      '@originchain/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@prisma/adapter-pg':
         specifier: ^7.9.1
         version: 7.9.1
@@ -37,6 +40,9 @@ importers:
       siwe:
         specifier: ^3.0.0
         version: 3.0.0(ethers@6.17.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))
+      viem:
+        specifier: 2.x
+        version: 2.55.10(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3)
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -62,9 +68,6 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
-      viem:
-        specifier: 2.x
-        version: 2.55.10(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.4.3)
 
   apps/frontend:
     dependencies:

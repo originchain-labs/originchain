@@ -29,6 +29,7 @@ export async function createCreatorProfile(
             displayName: data.displayName,
             bio: data.bio ?? null,
             avatarCid: data.avatarCid ?? null,
+            onChainConfirmed: false, // indexer flips this once the tx confirms
         },
     });
 
