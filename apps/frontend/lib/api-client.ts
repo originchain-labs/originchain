@@ -77,3 +77,27 @@ export async function confirmAssetRegistration(
     if (!res.ok) throw new Error("Failed to confirm asset");
     return res.json();
 }
+
+export async function listAssets(params: { creatorId?: string; q?: string; page?: number } = {}) {
+    const query = new URLSearchParams();
+    if (params.creatorId) query.set("creatorId", params.creatorId);
+    if (params.q) query.set("q", params.q);
+    if (params.page) query.set("page", String(params.page));
+
+    const res = await fetch(`${API_URL}/api/v1/assets?${query}`);
+    if (!res.ok) throw new Error("Failed to load assets");
+    return res.json();
+}
+
+export async function getAsset(id: string) {
+    const res = await fetch(`${API_URL}/api/v1/assets/${id}`);
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error("Failed to load asset");
+    return res.json();
+}
+
+export async function getCertificate(id: string) {
+    const res = await fetch(`${API_URL}/api/v1/assets/${id}/certificate`);
+    if (!res.ok) throw new Error("Failed to load certificate");
+    return res.json() as Promise<{ certificateUrl: string; qrCodeUrl: string }>;
+}

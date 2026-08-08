@@ -8,6 +8,7 @@ import {
     getAssetById,
     getOrCreateProofId,
     updateAssetCertificateCid,
+    listAssets,
 } from "../services/asset.service.js";
 import { generateCertificate } from "../services/certificate/certificate.service.js";
 import { storageService } from "../services/storage/index.js";
@@ -94,4 +95,26 @@ export async function getCertificate(req: AuthedRequest, res: Response) {
         // Per API_SPECIFICATION.md: falls back gracefully, never blocks core flow.
         res.status(404).json({ error: { code: "CERTIFICATE_NOT_FOUND", message: "Certificate generation failed" } });
     }
+}
+
+export async function list(req: AuthedRequest, res: Response) {
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, parseInt(req.query.limit as string) || 20);
+    const creatorId = req.query.creatorId as string | undefined;
+    const q = req.query.q as string | undefined;
+
+    const result = await listAssets({ creatorId, q, page, limit });
+    res.json(result);
+}
+
+export async function getOne(req: AuthedRequest, res: Response) {
+    const id = req.params.id;
+    if (typeof id !== "string") {
+        return res.status(404).json({ error: { code: "ASSET_NOT_FOUND", message: "Asset not found" } });
+    }
+    const asset = await getAssetById(id);
+    if (!asset || !asset.onChainConfirmed) {
+        return res.status(404).json({ error: { code: "ASSET_NOT_FOUND", message: "Asset not found" } });
+    }
+    res.json(asset);
 }

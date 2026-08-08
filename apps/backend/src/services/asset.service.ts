@@ -82,6 +82,7 @@ export async function confirmAsset(
 
     return asset;
 }
+
 export async function getAssetById(id: string) {
     return prisma.asset.findUnique({ where: { id }, include: { creator: true } });
 }
@@ -97,4 +98,25 @@ export async function getOrCreateProofId(assetId: string): Promise<string> {
     const proofId = `OC-${result[0]!.nextval.toString().padStart(6, "0")}`;
     await prisma.asset.update({ where: { id: assetId }, data: { proofId } });
     return proofId;
+}
+
+export async function listAssets(params: { creatorId?: string | undefined; q?: string | undefined; page: number; limit: number }) {
+    const where = {
+        ...(params.creatorId && { creatorId: params.creatorId }),
+        ...(params.q && { title: { contains: params.q, mode: "insensitive" as const } }),
+        onChainConfirmed: true, // only show confirmed assets publicly
+    };
+
+    const [results, total] = await Promise.all([
+        prisma.asset.findMany({
+            where,
+            include: { creator: { select: { displayName: true, walletAddress: true } } },
+            skip: (params.page - 1) * params.limit,
+            take: params.limit,
+            orderBy: { registeredAt: "desc" },
+        }),
+        prisma.asset.count({ where }),
+    ]);
+
+    return { results, page: params.page, total };
 }
