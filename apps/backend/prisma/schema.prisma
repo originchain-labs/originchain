@@ -26,6 +26,8 @@ model Creator {
 
   @@map("creators")
   @@index([walletAddress])
+
+  assets Asset[]
 }
 
 
@@ -36,4 +38,23 @@ model IndexerState {
   updatedAt     DateTime @updatedAt
 
   @@map("indexer_state")
+}
+
+
+model Asset {
+  id                String   @id @default(uuid())
+  creatorId         String
+  creator           Creator  @relation(fields: [creatorId], references: [id])
+  contentHash       String   @unique @db.VarChar(66)
+  ipfsCid           String   @db.VarChar(100)
+  metadataCid       String   @db.VarChar(100)
+  title             String   @db.VarChar(200)
+  description       String?
+  aiGeneratedFlag   Boolean  @default(false)
+  registeredAt      DateTime?
+  txHash            String?  @db.VarChar(66)
+  onChainConfirmed  Boolean  @default(false)
+
+  @@map("assets")
+  @@index([creatorId])
 }
