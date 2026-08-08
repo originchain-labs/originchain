@@ -146,11 +146,12 @@ Form submission → validation → avatar/media pinned to IPFS → `CreatorRegis
 ### Asset Upload → Hash Generation → Metadata Creation → IPFS Upload
 1. File selected client-side.
 2. Client computes a content hash (e.g. SHA-256) before upload, shown to the user as a preview of what will be registered.
-3. AI layer suggests title/tags/description; creator can edit.
-4. Backend pins asset + finalized metadata JSON (tagged with a `version`/`schema` field — see Metadata Versioning below) via the Storage Service, returns CID.
+3. `POST /assets/prepare`: backend pins the file via the Storage Service and returns `ipfsCid`; AI layer suggests title/tags/description as a draft (not yet pinned).
+4. Creator reviews/edits the suggested metadata client-side (no network call).
+5. `POST /assets/finalize-metadata`: backend pins the creator-approved metadata JSON (tagged with a `version`/`schema` field — see Metadata Versioning below), returns `metadataCid`. **This must happen before signing** — the exact CID returned here is what gets registered on-chain, so the blockchain and Postgres never disagree about which metadata document was actually used.
 
 ### Smart Contract Interaction
-Creator reviews hash + CID → signs `AssetRegistry.registerAsset(hash, cid, metadataURI)` → transaction confirmed → event indexed into Postgres.
+Creator reviews hash + CIDs → signs `AssetRegistry.registerAsset(hash, ipfsCid, metadataCid)` using the *exact* CIDs from steps 3 and 5 → transaction confirmed → `POST /assets/confirm` verifies the transaction on-chain and persists the record using those same submitted values (never re-pins or recomputes) → event also indexed into Postgres asynchronously by the asset indexer, as a second, eventually-consistent confirmation path.
 
 ### Verification
 Any visitor can input a file (or reference an asset page) → client recomputes hash → compares against `AssetRegistry` on-chain record → match/no-match displayed with the on-chain timestamp and creator address.

@@ -66,10 +66,17 @@ Base path: `/api/v1`. All authenticated routes require a session token issued vi
 - **Response:** `{ "contentHash": "0x...", "ipfsCid": "string", "suggestedMetadata": { "title", "description", "tags": [] } }`
 - **Errors:** `400 VALIDATION_ERROR`, `502 IPFS_PIN_FAILED`, `502 AI_SERVICE_FAILED` (degrades gracefully — returns without `suggestedMetadata` rather than failing the whole request)
 
-### `POST /assets/confirm`
-- **Description:** Called after on-chain registration succeeds, to persist the indexed record immediately (in addition to the async indexer, for instant UI feedback).
+### `POST /assets/finalize-metadata`
+- **Description:** Pins the creator-approved final metadata (after reviewing/editing `/prepare`'s AI suggestions) to IPFS, returning the exact CID that must be used when signing `registerAsset` on-chain. **Must be called before the transaction is signed** — the blockchain and PostgreSQL must reference the identical metadata CID, so this step cannot be skipped or reordered after confirmation.
 - **Auth:** Required
-- **Request:** `{ "contentHash": "0x...", "txHash": "0x...", "finalMetadata": { "title", "description", "tags": [] } }`
+- **Request:** `{ "title": "string", "description": "string?", "tags": ["string"] }`
+- **Response:** `{ "metadataCid": "string" }`
+- **Errors:** `400 VALIDATION_ERROR`, `502 IPFS_PIN_FAILED`
+
+### `POST /assets/confirm`
+- **Description:** Called after on-chain registration succeeds. Verifies the transaction on-chain and persists the indexed record using the exact `ipfsCid`/`metadataCid` that were signed — never re-pins or recomputes metadata, since the blockchain is the source of truth for which CID was actually registered.
+- **Auth:** Required
+- **Request:** `{ "contentHash": "0x...", "ipfsCid": "string", "metadataCid": "string", "txHash": "0x...", "finalMetadata": { "title", "description", "tags": [] } }`
 - **Response:** `{ asset: {...} }`
 - **Errors:** `400 TX_NOT_FOUND_ON_CHAIN`, `409 ASSET_ALREADY_REGISTERED`
 
