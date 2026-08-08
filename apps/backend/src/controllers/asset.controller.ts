@@ -1,6 +1,16 @@
 import type { Response } from "express";
 import type { AuthedRequest } from "../middleware/auth.js";
-import { prepareAsset, finalizeMetadata, confirmAsset } from "../services/asset.service.js";
+import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import {
+    prepareAsset,
+    finalizeMetadata,
+    confirmAsset,
+    getAssetById,
+    getOrCreateProofId,
+    updateAssetCertificateCid,
+} from "../services/asset.service.js";
+import { generateCertificate } from "../services/certificate/certificate.service.js";
+import { storageService } from "../services/storage/index.js";
 
 export async function prepare(req: AuthedRequest, res: Response) {
     try {
@@ -40,5 +50,48 @@ export async function confirm(req: AuthedRequest, res: Response) {
         };
         const mapped = errorMap[message] || { status: 500, code: "UNKNOWN_ERROR" };
         res.status(mapped.status).json({ error: { code: mapped.code, message } });
+    }
+}
+
+export async function getCertificate(req: AuthedRequest, res: Response) {
+    try {
+        const id = req.params.id;
+        if (typeof id !== "string") {
+            return res.status(404).json({ error: { code: "CERTIFICATE_NOT_FOUND", message: "Asset not registered" } });
+        }
+        const asset = await getAssetById(id);
+        if (!asset || !asset.onChainConfirmed) {
+            return res.status(404).json({ error: { code: "CERTIFICATE_NOT_FOUND", message: "Asset not registered" } });
+        }
+
+        let cid = asset.certificateCid;
+        if (!cid) {
+            const proofId = await getOrCreateProofId(asset.id);
+            const verificationUrl = `${process.env.FRONTEND_URL}/verify/${proofId}`;
+            cid = await generateCertificate({
+                proofId,
+                assetTitle: asset.title,
+                creatorDisplayName: asset.creator.displayName,
+                creatorWalletAddress: asset.creator.walletAddress,
+                contentHash: asset.contentHash,
+                metadataCid: asset.metadataCid,
+                txHash: asset.txHash!,
+                contractAddress: CONTRACT_ADDRESSES.arbitrumSepolia.assetRegistry,
+                network: "Arbitrum Sepolia",
+                registeredAt: asset.registeredAt!,
+                artworkIpfsCid: asset.ipfsCid,
+                verificationUrl,
+            });
+            await updateAssetCertificateCid(asset.id, cid);
+        }
+
+        res.json({
+            certificateUrl: storageService.getGatewayUrl(cid),
+            qrCodeUrl: storageService.getGatewayUrl(cid), // QR is embedded in the PDF itself
+        });
+    } catch (err) {
+        console.error("[asset] certificate generation failed:", err);
+        // Per API_SPECIFICATION.md: falls back gracefully, never blocks core flow.
+        res.status(404).json({ error: { code: "CERTIFICATE_NOT_FOUND", message: "Certificate generation failed" } });
     }
 }
