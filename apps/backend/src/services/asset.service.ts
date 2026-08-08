@@ -82,3 +82,19 @@ export async function confirmAsset(
 
     return asset;
 }
+export async function getAssetById(id: string) {
+    return prisma.asset.findUnique({ where: { id }, include: { creator: true } });
+}
+
+export async function updateAssetCertificateCid(id: string, certificateCid: string) {
+    return prisma.asset.update({ where: { id }, data: { certificateCid } });
+}
+
+export async function getOrCreateProofId(assetId: string): Promise<string> {
+    const asset = await prisma.asset.findUniqueOrThrow({ where: { id: assetId } });
+    if (asset.proofId) return asset.proofId;
+    const result = await prisma.$queryRaw<{ nextval: bigint }[]>`SELECT nextval('proof_id_seq')`;
+    const proofId = `OC-${result[0]!.nextval.toString().padStart(6, "0")}`;
+    await prisma.asset.update({ where: { id: assetId }, data: { proofId } });
+    return proofId;
+}

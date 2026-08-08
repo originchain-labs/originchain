@@ -54,6 +54,8 @@ model Asset {
   registeredAt      DateTime?
   txHash            String?  @db.VarChar(66)
   onChainConfirmed  Boolean  @default(false)
+  certificateCid    String?  @db.VarChar(100)
+  proofId           String?  @unique @db.VarChar(20)
 
   @@map("assets")
   @@index([creatorId])
