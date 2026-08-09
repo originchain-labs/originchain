@@ -28,6 +28,7 @@ model Creator {
   @@index([walletAddress])
 
   assets Asset[]
+  reviewsGiven Review[]
 }
 
 
@@ -59,4 +60,23 @@ model Asset {
 
   @@map("assets")
   @@index([creatorId])
+
+  reviews Review[]
+}
+
+
+model Review {
+  id             String   @id @default(uuid())
+  assetId        String
+  asset          Asset    @relation(fields: [assetId], references: [id])
+  reviewerId     String
+  reviewer       Creator  @relation(fields: [reviewerId], references: [id])
+  rating         Int
+  comment        String?
+  txHash         String   @db.VarChar(66)
+  createdAt      DateTime @default(now())
+
+  @@map("reviews")
+  @@unique([assetId, reviewerId])
+  @@index([assetId])
 }

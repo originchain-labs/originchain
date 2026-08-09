@@ -1,6 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { prepare, finalize, confirm, getCertificate, list, getOne, verify } from "../controllers/asset.controller.js";
+import { listForAsset } from "../controllers/review.controller.js";
 import { requireAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { finalizeMetadataSchema, confirmAssetSchema } from "../validators/asset.validator.js";
@@ -19,6 +20,7 @@ router.post("/confirm", requireAuth, validate(confirmAssetSchema), confirm);
 router.get("/", list);
 router.get("/verify", verify);
 router.get("/:id", getOne);
+router.get("/:id/reviews", listForAsset);
 router.get("/:id/certificate", getCertificate);
 
 export default router;
