@@ -120,3 +120,19 @@ export async function listAssets(params: { creatorId?: string | undefined; q?: s
 
     return { results, page: params.page, total };
 }
+
+export async function verifyByHash(contentHash: string) {
+    const asset = await prisma.asset.findUnique({
+        where: { contentHash, onChainConfirmed: true },
+        include: { creator: { select: { displayName: true, walletAddress: true } } },
+    });
+    return asset;
+}
+
+export async function verifyByProofId(proofId: string) {
+    const asset = await prisma.asset.findUnique({
+        where: { proofId, onChainConfirmed: true },
+        include: { creator: { select: { displayName: true, walletAddress: true } } },
+    });
+    return asset;
+}
