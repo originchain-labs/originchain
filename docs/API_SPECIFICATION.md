@@ -114,7 +114,7 @@ Base path: `/api/v1`. All authenticated routes require a session token issued vi
 - **Auth:** Required
 - **Request:** `{ "assetId": "uuid", "rating": 1-5, "comment": "string?", "txHash": "0x..." }`
 - **Validation:** `rating` integer 1–5; one review per reviewer per asset
-- **Errors:** `409 ALREADY_REVIEWED`, `400 VALIDATION_ERROR`, `400 TX_NOT_FOUND_ON_CHAIN`
+- **Errors:** `409 ALREADY_REVIEWED`, `400 VALIDATION_ERROR`, `400 TX_NOT_FOUND_ON_CHAIN`, `400 TX_MISMATCH`, `404 CREATOR_NOT_FOUND`, `404 ASSET_NOT_FOUND`
 
 ### `GET /assets/:id/reviews`
 - **Description:** List reviews for an asset.
