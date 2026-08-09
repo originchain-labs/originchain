@@ -9,6 +9,8 @@ import {
     getOrCreateProofId,
     updateAssetCertificateCid,
     listAssets,
+    verifyByHash,
+    verifyByProofId,
 } from "../services/asset.service.js";
 import { generateCertificate } from "../services/certificate/certificate.service.js";
 import { storageService } from "../services/storage/index.js";

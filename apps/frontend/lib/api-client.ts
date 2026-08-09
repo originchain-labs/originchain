@@ -101,3 +101,18 @@ export async function getCertificate(id: string) {
     if (!res.ok) throw new Error("Failed to load certificate");
     return res.json() as Promise<{ certificateUrl: string; qrCodeUrl: string }>;
 }
+
+export async function verifyAsset(params: { hash?: string; proofId?: string }) {
+    const query = new URLSearchParams();
+    if (params.hash) query.set("hash", params.hash);
+    if (params.proofId) query.set("proofId", params.proofId);
+
+    const res = await fetch(`${API_URL}/api/v1/assets/verify?${query}`);
+    if (!res.ok) throw new Error("Verification check failed");
+    return res.json() as Promise<{
+        verified: boolean;
+        asset?: { title: string; contentHash: string; registeredAt: string; txHash: string; proofId: string };
+        creatorAddress?: string;
+        creatorDisplayName?: string;
+    }>;
+}
