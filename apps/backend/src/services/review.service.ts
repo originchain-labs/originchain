@@ -2,9 +2,13 @@ import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createPublicClient, http } from "viem";
 import { arbitrumSepolia } from "viem/chains";
+import { decodeFunctionData } from "viem";
+import { reviewRegistryAbi } from "@originchain/shared-types/contracts/reviewRegistry";
+import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 const chainClient = createPublicClient({ chain: arbitrumSepolia, transport: http(process.env.RPC_URL) });
+const REVIEW_REGISTRY = CONTRACT_ADDRESSES.arbitrumSepolia.reviewRegistry.toLowerCase();
 
 export async function submitReview(
     reviewerWalletAddress: string,
@@ -27,6 +31,33 @@ export async function submitReview(
     const receipt = await chainClient.getTransactionReceipt({ hash: txHash }).catch(() => null);
     if (!receipt || receipt.status !== "success") {
         throw new Error("TX_NOT_FOUND_ON_CHAIN");
+    }
+
+    if (receipt.to?.toLowerCase() !== REVIEW_REGISTRY) {
+        throw new Error("TX_MISMATCH");
+    }
+    if (receipt.from.toLowerCase() !== reviewerWalletAddress.toLowerCase()) {
+        throw new Error("TX_MISMATCH");
+    }
+
+    const tx = await chainClient.getTransaction({ hash: txHash });
+    let decoded;
+    try {
+        decoded = decodeFunctionData({ abi: reviewRegistryAbi, data: tx.input });
+    } catch {
+        throw new Error("TX_MISMATCH");
+    }
+
+    if (decoded.functionName !== "submitReview") {
+        throw new Error("TX_MISMATCH");
+    }
+
+    const [assetHashArg, ratingArg] = decoded.args;
+    if (assetHashArg.toLowerCase() !== asset.contentHash.toLowerCase()) {
+        throw new Error("TX_MISMATCH");
+    }
+    if (ratingArg !== rating) {
+        throw new Error("TX_MISMATCH");
     }
 
     return prisma.review.create({

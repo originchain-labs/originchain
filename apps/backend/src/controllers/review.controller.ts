@@ -14,6 +14,7 @@ export async function submit(req: AuthedRequest, res: Response) {
             ASSET_NOT_FOUND: { status: 404, code: "ASSET_NOT_FOUND" },
             ALREADY_REVIEWED: { status: 409, code: "ALREADY_REVIEWED" },
             TX_NOT_FOUND_ON_CHAIN: { status: 400, code: "TX_NOT_FOUND_ON_CHAIN" },
+            TX_MISMATCH: { status: 400, code: "TX_MISMATCH" },
         };
         const mapped = errorMap[message] || { status: 500, code: "UNKNOWN_ERROR" };
         res.status(mapped.status).json({ error: { code: mapped.code, message } });
