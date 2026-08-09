@@ -4,6 +4,7 @@ import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
 import creatorRoutes from "./routes/creator.routes.js";
 import assetRoutes from "./routes/asset.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
 import { startCreatorIndexer } from "./indexer/creator-indexer.js";
 import { startAssetIndexer } from "./indexer/asset-indexer.js";
 
@@ -33,3 +34,4 @@ startCreatorIndexer();
 
 app.use("/api/v1/creators", creatorRoutes);
 app.use("/api/v1/assets", assetRoutes);
+app.use("/api/v1/reviews", reviewRoutes);
