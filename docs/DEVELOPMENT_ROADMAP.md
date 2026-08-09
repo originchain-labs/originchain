@@ -1,6 +1,6 @@
 # OriginChain — Development Roadmap
 
-Eleven phases, ordered by dependency, reflecting the revised implementation order adopted during Phase 0 kickoff (frontend/backend skeleton and wallet auth were moved earlier than in the original draft, since wallet auth is the foundation every other feature depends on). Each phase lists its goal, deliverables, dependencies, and what "done" means.
+Twelve phases, ordered by dependency, reflecting the revised implementation order adopted during Phase 0 kickoff (frontend/backend skeleton and wallet auth were moved earlier than in the original draft, since wallet auth is the foundation every other feature depends on) plus a dedicated Design & Polish phase added before deployment. Each phase lists its goal, deliverables, dependencies, and what "done" means.
 
 **Status key:** ✅ Complete · 🔶 In Progress · ⬜ Not Started
 
@@ -55,7 +55,7 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 3 — Creator Profile 🔶 *(next up)*
+## Phase 3 — Creator Profile ✅
 
 **Goal:** First full vertical slice: wallet → contract → database → UI.
 
@@ -71,7 +71,7 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 4 — IPFS Integration ⬜
+## Phase 4 — IPFS Integration ✅
 
 **Goal:** Off-chain storage layer working, ready for asset registration to build on.
 
@@ -88,7 +88,7 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 5 — Asset Registration ⬜
+## Phase 5 — Asset Registration ✅
 
 **Goal:** The core product feature — proof-of-origin registration.
 
@@ -105,12 +105,12 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 6 — Verification ⬜
+## Phase 6 — Verification 🔶 *(next up)*
 
 **Goal:** Public, wallet-free proof verification — the trust-building feature for non-technical visitors and judges.
 
 **Deliverables:**
-- Public verification page (`/verify`), no wallet required
+- Public verification page (`/verify/:proofId`, with a `/verify` fallback supporting hash lookup too), no wallet required — must match the `/verify/{proofId}` URL already being encoded into Proof of Origin Certificate QR codes (Phase 5), not the originally-sketched `/verify?hash=...` query-param form
 - `GET /assets/verify` endpoint
 - Clear match/no-match UI with on-chain timestamp + creator display
 
@@ -165,7 +165,26 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 10 — Deployment ⬜
+## Phase 10 — Design & Polish ⬜
+
+**Goal:** Move from bare-bones functional UI (plain buttons, unstyled forms — what every prior phase has shipped) to a visually polished, demo-ready product. This is deliberately scoped as its own phase rather than spread across feature phases, so functional correctness isn't blocked on visual iteration, and so polish happens once against a stable, complete feature set rather than being redone repeatedly as features change.
+
+**Deliverables:**
+- Consistent visual design system applied across all screens (leveraging the shadcn/ui + Base UI + Nova preset + Zinc palette foundation set in Phase 1)
+- Real styling for: wallet connect header, creator profile creation/edit, asset upload/browse, verification page, review/reputation displays
+- Responsive/mobile-friendly pass
+- Loading states, empty states, and error states designed (not just functional) across all flows
+- Landing/homepage replacing the default Next.js starter content
+- Micro-interactions/animation pass using Framer Motion (installed since Phase 1, unused so far)
+- Proof of Origin Certificate visual design (the shareable artifact from Phase 5)
+
+**Dependencies:** All feature phases (3–9) substantially complete — polishing before features exist means redoing work as flows change.
+
+**Completion Criteria:** Every screen a demo audience or judge would see looks intentional and cohesive, not like default framework scaffolding. A non-technical person could navigate the app without confusion about what's clickable, what's loading, or what went wrong when something fails.
+
+---
+
+## Phase 11 — Deployment ⬜
 
 **Goal:** Stable, demo-ready deployed environment.
 
@@ -187,16 +206,19 @@ Eleven phases, ordered by dependency, reflecting the revised implementation orde
 flowchart TD
     P0[Phase 0: Foundation done] --> P1[Phase 1: Frontend+Backend Skeleton done]
     P1 --> P2[Phase 2: Wallet Auth done]
-    P2 --> P3[Phase 3: Creator Profile in progress]
-    P3 --> P4[Phase 4: IPFS Integration]
-    P3 --> P5[Phase 5: Asset Registration]
+    P2 --> P3[Phase 3: Creator Profile done]
+    P3 --> P4[Phase 4: IPFS Integration done]
+    P3 --> P5[Phase 5: Asset Registration done]
     P4 --> P5
-    P5 --> P6[Phase 6: Verification]
+    P5 --> P6[Phase 6: Verification next]
     P5 --> P7[Phase 7: Reviews]
     P3 --> P7
     P7 --> P8[Phase 8: Reputation]
     P5 --> P9[Phase 9: AI Features]
     P8 --> P9
-    P6 --> P10[Phase 10: Deployment]
+    P6 --> P10[Phase 10: Design & Polish]
+    P7 --> P10
+    P8 --> P10
     P9 --> P10
+    P10 --> P11[Phase 11: Deployment]
 ```

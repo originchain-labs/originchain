@@ -118,3 +118,34 @@ export async function getOne(req: AuthedRequest, res: Response) {
     }
     res.json(asset);
 }
+
+export async function verify(req: AuthedRequest, res: Response) {
+    const { hash, proofId } = req.query;
+
+    if (!hash && !proofId) {
+        return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "hash or proofId required" } });
+    }
+
+    const asset = hash
+        ? await verifyByHash(hash as string)
+        : await verifyByProofId(proofId as string);
+
+    if (!asset) {
+        return res.json({ verified: false });
+    }
+
+    res.json({
+        verified: true,
+        asset: {
+            id: asset.id,
+            title: asset.title,
+            contentHash: asset.contentHash,
+            registeredAt: asset.registeredAt,
+            txHash: asset.txHash,
+            proofId: asset.proofId,
+        },
+        onChainTimestamp: asset.registeredAt,
+        creatorAddress: asset.creator.walletAddress,
+        creatorDisplayName: asset.creator.displayName,
+    });
+}
