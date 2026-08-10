@@ -39,6 +39,10 @@ export async function getOrganization(id: string) {
   return org;
 }
 
+export async function getMyOrganizations(requesterId: string) {
+  return prisma.organization.findMany({ where: { ownerId: requesterId } });
+}
+
 export async function updateOrganization(id: string, requesterId: string, name: string) {
   const org = await prisma.organization.findUnique({ where: { id } });
   if (!org) throw new Error("ORGANIZATION_NOT_FOUND");

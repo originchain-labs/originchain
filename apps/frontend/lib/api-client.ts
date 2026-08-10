@@ -201,3 +201,43 @@ export async function search(q: string) {
         total: number;
     }>;
 }
+
+export async function getMyOrganizations(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/organizations/mine`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to load organizations");
+    return res.json() as Promise<{ organizations: { id: string; name: string; ownerId: string; walletAddress: string | null; createdAt: string }[] }>;
+}
+
+export async function createOrganization(name: string, token: string) {
+    const res = await fetch(`${API_URL}/api/v1/organizations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name }),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || "Failed to create organization");
+    }
+    return res.json();
+}
+
+export async function updateOrganization(id: string, name: string, token: string) {
+    const res = await fetch(`${API_URL}/api/v1/organizations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error("Failed to update organization");
+    return res.json();
+}
+
+export async function getAdminAnalytics(token: string) {
+    const res = await fetch(`${API_URL}/api/v1/admin/analytics`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.status === 403) return null;
+    if (!res.ok) throw new Error("Failed to load admin analytics");
+    return res.json() as Promise<{ totalCreators: number; totalAssets: number; totalReviews: number }>;
+}
