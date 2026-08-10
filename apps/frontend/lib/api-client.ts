@@ -23,7 +23,7 @@ export async function verifySignature(message: string, signature: string) {
     }
     return res.json() as Promise<{
         token: string;
-        creator: { walletAddress: string; isNewCreator: boolean };
+        creator: { id: string; walletAddress: string; isNewCreator: boolean };
     }>;
 }
 
@@ -147,4 +147,20 @@ export async function getCreatorReputation(creatorId: string) {
     const res = await fetch(`${API_URL}/api/v1/creators/${creatorId}/reputation`);
     if (!res.ok) throw new Error("Failed to load reputation");
     return res.json() as Promise<{ score: number; assetCount: number; reviewCount: number }>;
+}
+
+export async function getCreatorInsights(creatorId: string, token: string) {
+    const res = await fetch(`${API_URL}/api/v1/creators/${creatorId}/insights`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error("Failed to load insights");
+    return res.json() as Promise<{
+        totalAssets: number;
+        totalReviews: number;
+        averageRating: number | null;
+        reputationScore: number;
+        assetsOverTime: { date: string; count: number }[];
+        reviewsOverTime: { date: string; count: number; averageRating: number }[];
+        aiSummary: string | null;
+    }>;
 }

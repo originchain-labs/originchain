@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { generateNonce, verifySiweSignature, issueSessionToken } from "../services/auth/auth.service.js";
+import { getCreatorByWallet } from "../services/creator.service.js";
 
 export async function getNonce(req: Request, res: Response) {
     const nonce = generateNonce();
@@ -13,11 +14,13 @@ export async function verify(req: Request, res: Response) {
         const walletAddress = await verifySiweSignature(message, signature);
         const token = issueSessionToken(walletAddress);
 
-        // TODO: once Prisma creator model exists (Phase 3), look up or create
-        // the creator record here and return isNewCreator accurately.
+        const existingCreator = await getCreatorByWallet(walletAddress);
+
         res.json({
             token,
-            creator: { walletAddress, isNewCreator: true },
+            creator: existingCreator
+                ? { id: existingCreator.id, walletAddress, isNewCreator: false }
+                : { walletAddress, isNewCreator: true },
         });
     } catch (err) {
         const message = err instanceof Error ? err.message : "UNKNOWN_ERROR";

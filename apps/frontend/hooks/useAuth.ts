@@ -54,8 +54,8 @@ export function useAuth() {
             const message = siweMessage.prepareMessage();
             const signature = await signMessageAsync({ message });
 
-            const { token } = await verifySignature(message, signature);
-            saveSession(token, address);
+            const { token, creator } = await verifySignature(message, signature);
+            saveSession(token, address, creator.id);
             setIsAuthenticated(true);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Sign-in failed");
