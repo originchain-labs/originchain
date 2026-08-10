@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getSession } from "@/lib/session";
 import { getCreatorProfile, updateCreatorProfile } from "@/lib/api-client";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export default function EditProfilePage() {
     const [session, setSession] = useState<{ token: string; walletAddress: string; creatorId: string } | null>(null);
@@ -45,17 +46,9 @@ export default function EditProfilePage() {
         );
     }
 
-    if (!session) {
-        return (
-            <div className="mx-auto max-w-md p-6">
-                <h1 className="mb-2 text-xl font-semibold text-zinc-900">Edit Profile</h1>
-                <p className="text-sm text-zinc-600">Please sign in to edit your profile.</p>
-            </div>
-        );
-    }
-
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!session) return;
         setIsSaving(true);
         setStatusMessage(null);
 
@@ -77,53 +70,55 @@ export default function EditProfilePage() {
     };
 
     return (
-        <div className="mx-auto max-w-md p-6">
-            <h1 className="mb-4 text-xl font-semibold text-zinc-900">Edit Profile</h1>
+        <RequireAuth>
+            <div className="mx-auto max-w-md p-6">
+                <h1 className="mb-4 text-xl font-semibold text-zinc-900">Edit Profile</h1>
 
-            <form onSubmit={handleSave} className="space-y-4">
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">Display Name</label>
-                    <input
-                        type="text"
-                        required
-                        className="w-full rounded border border-zinc-300 p-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none"
-                        placeholder="Display Name"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                    />
-                </div>
-
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-zinc-700">Bio</label>
-                    <textarea
-                        rows={4}
-                        className="w-full rounded border border-zinc-300 p-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none"
-                        placeholder="Tell the community about yourself..."
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                    />
-                </div>
-
-                {statusMessage && (
-                    <div
-                        className={`rounded p-3 text-sm ${
-                            statusMessage.type === "success"
-                                ? "bg-green-50 text-green-700 border border-green-200"
-                                : "bg-red-50 text-red-700 border border-red-200"
-                        }`}
-                    >
-                        {statusMessage.text}
+                <form onSubmit={handleSave} className="space-y-4">
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-zinc-700">Display Name</label>
+                        <input
+                            type="text"
+                            required
+                            className="w-full rounded border border-zinc-300 p-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                            placeholder="Display Name"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                        />
                     </div>
-                )}
 
-                <button
-                    type="submit"
-                    disabled={isSaving || !displayName.trim()}
-                    className="w-full rounded bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950"
-                >
-                    {isSaving ? "Saving..." : "Save Profile"}
-                </button>
-            </form>
-        </div>
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-zinc-700">Bio</label>
+                        <textarea
+                            rows={4}
+                            className="w-full rounded border border-zinc-300 p-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none"
+                            placeholder="Tell the community about yourself..."
+                            value={bio}
+                            onChange={(e) => setBio(e.target.value)}
+                        />
+                    </div>
+
+                    {statusMessage && (
+                        <div
+                            className={`rounded p-3 text-sm ${
+                                statusMessage.type === "success"
+                                    ? "bg-green-50 text-green-700 border border-green-200"
+                                    : "bg-red-50 text-red-700 border border-red-200"
+                            }`}
+                        >
+                            {statusMessage.text}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        disabled={isSaving || !displayName.trim()}
+                        className="w-full rounded bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-50 dark:bg-zinc-50 dark:text-zinc-950"
+                    >
+                        {isSaving ? "Saving..." : "Save Profile"}
+                    </button>
+                </form>
+            </div>
+        </RequireAuth>
     );
 }

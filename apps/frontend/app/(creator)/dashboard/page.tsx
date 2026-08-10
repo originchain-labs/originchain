@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getCreatorInsights } from "@/lib/api-client";
-import { getSession } from "@/lib/session";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import { LineChart } from "@/components/charts/line-chart";
 import { Line } from "@/components/charts/line";
 import { Grid } from "@/components/charts/grid";
@@ -10,22 +8,10 @@ import { XAxis } from "@/components/charts/x-axis";
 import { ChartTooltip } from "@/components/charts/tooltip";
 
 export default function DashboardPage() {
-    const [insights, setInsights] = useState<Awaited<ReturnType<typeof getCreatorInsights>> | null>(null);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const session = getSession();
-        if (!session) {
-            setError("Please sign in to view your dashboard");
-            return;
-        }
-        getCreatorInsights(session.creatorId, session.token)
-            .then(setInsights)
-            .catch((err) => setError(err.message));
-    }, []);
+    const { insights, error, loading } = useAnalytics();
 
     if (error) return <p className="p-6 text-sm text-red-600">{error}</p>;
-    if (!insights) return <p className="p-6 text-sm text-zinc-500">Loading dashboard…</p>;
+    if (loading || !insights) return <p className="p-6 text-sm text-zinc-500">Loading dashboard…</p>;
 
     return (
         <div className="mx-auto max-w-3xl p-6">
