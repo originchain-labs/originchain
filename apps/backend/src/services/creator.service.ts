@@ -50,6 +50,41 @@ export async function getCreatorByWallet(walletAddress: string) {
     return prisma.creator.findUnique({ where: { walletAddress } });
 }
 
+export async function getPublicCreatorProfile(id: string) {
+    const creator = await prisma.creator.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            walletAddress: true,
+            displayName: true,
+            bio: true,
+            avatarCid: true,
+            organizationId: true,
+        },
+    });
+    if (!creator) throw new Error("CREATOR_NOT_FOUND");
+    return creator;
+}
+
+export async function updateCreatorProfile(
+    id: string,
+    requesterWalletAddress: string,
+    data: { displayName?: string; bio?: string; avatarCid?: string }
+) {
+    const creator = await prisma.creator.findUnique({ where: { id } });
+    if (!creator) throw new Error("CREATOR_NOT_FOUND");
+    if (creator.walletAddress !== requesterWalletAddress) throw new Error("FORBIDDEN");
+
+    return prisma.creator.update({
+        where: { id },
+        data: {
+            ...(data.displayName !== undefined && { displayName: data.displayName }),
+            ...(data.bio !== undefined && { bio: data.bio }),
+            ...(data.avatarCid !== undefined && { avatarCid: data.avatarCid }),
+        },
+    });
+}
+
 export async function getCreatorReputation(creatorId: string) {
     const creator = await prisma.creator.findUnique({ where: { id: creatorId } });
     if (!creator) throw new Error("CREATOR_NOT_FOUND");
