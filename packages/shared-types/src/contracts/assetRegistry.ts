@@ -31,4 +31,11 @@ export const assetRegistryAbi = [
         ],
         stateMutability: "view",
     },
+    {
+        type: "function",
+        name: "getAssetsByCreator",
+        inputs: [{ name: "creator", type: "address" }],
+        outputs: [{ name: "", type: "bytes32[]" }],
+        stateMutability: "view",
+    },
 ] as const;

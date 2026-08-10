@@ -142,3 +142,9 @@ export async function getAssetReviews(assetId: string) {
         averageRating: number | null;
     }>;
 }
+
+export async function getCreatorReputation(creatorId: string) {
+    const res = await fetch(`${API_URL}/api/v1/creators/${creatorId}/reputation`);
+    if (!res.ok) return null;
+    return res.json() as Promise<{ score: number; assetCount: number; reviewCount: number }>;
+}
