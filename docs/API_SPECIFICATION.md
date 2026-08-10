@@ -131,6 +131,13 @@ Base path: `/api/v1`. All authenticated routes require a session token issued vi
 - **Auth:** None
 - **Response:** `{ creatorId, score, assetCount, reviewCount, lastUpdated }`
 
+### `GET /creators/:id/insights`
+- **Description:** AI-assisted summary of a creator's own registered activity (assets, reviews, reputation), for their private dashboard.
+- **Auth:** Required, must match `:id`
+- **Response:** `{ totalAssets, totalReviews, averageRating, reputationScore, assetsOverTime: [{ date, count }], reviewsOverTime: [{ date, count, averageRating }], aiSummary }`
+- **Notes:** `averageRating` is `null` (not `0`) when there are no reviews. `aiSummary` is `null` if the AI call fails or is unavailable — the rest of the response is unaffected.
+- **Errors:** `401 UNAUTHORIZED`, `403 FORBIDDEN` (not your profile), `404 CREATOR_NOT_FOUND`
+
 ---
 
 ## Analytics

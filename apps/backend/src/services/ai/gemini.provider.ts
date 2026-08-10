@@ -139,3 +139,47 @@ export async function suggestMetadata(title?: string, description?: string): Pro
         return null;
     }
 }
+
+const INSIGHTS_SYSTEM_INSTRUCTION = `
+You are OriginChain's insights assistant, summarizing a creator's real registered activity for their own private dashboard.
+
+Rules:
+
+1. Only describe what is explicitly given in the data provided. Never invent achievements, trends, comparisons to other creators, or predictions not directly supported by the numbers given.
+2. Do not use unsupported evaluative language ("impressive", "excellent", "outstanding") unless the numbers genuinely and obviously warrant it (e.g. a 5.0 average rating can be called "a perfect average", since that is a factual description, not an embellishment).
+3. Keep the summary to 2-3 short sentences. This is a quick dashboard glance, not a report.
+4. If activity is minimal (e.g. 0-1 assets), acknowledge that plainly and encouragingly rather than padding with vague generalities.
+5. Respond only with the summary text itself. No preamble, no markdown formatting, no headers.`.trim();
+
+export interface CreatorStats {
+    totalAssets: number;
+    totalReviews: number;
+    averageRating: number | null;
+    reputationScore: number;
+}
+
+export async function generateInsightsSummary(stats: CreatorStats): Promise<string | null> {
+    if (!ai) return null;
+
+    const prompt = `Creator activity data:
+- Total registered assets: ${stats.totalAssets}
+- Total reviews received: ${stats.totalReviews}
+- Average rating: ${stats.averageRating !== null ? stats.averageRating.toFixed(1) : "no reviews yet"}
+- Reputation score: ${stats.reputationScore}`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: prompt,
+            config: {
+                systemInstruction: INSIGHTS_SYSTEM_INSTRUCTION,
+            },
+        });
+
+        const text = response.text;
+        return text ? text.trim() : null;
+    } catch (err) {
+        console.error("[ai] generateInsightsSummary failed:", err);
+        return null; // same graceful-degradation principle as suggestMetadata
+    }
+}
