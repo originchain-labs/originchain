@@ -116,3 +116,29 @@ export async function verifyAsset(params: { hash?: string; proofId?: string }) {
         creatorDisplayName?: string;
     }>;
 }
+
+export async function submitReviewToBackend(
+    data: { assetId: string; rating: number; comment?: string; txHash: string },
+    token: string
+) {
+    const res = await fetch(`${API_URL}/api/v1/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error?.message || "Failed to submit review");
+    }
+    return res.json();
+}
+
+export async function getAssetReviews(assetId: string) {
+    const res = await fetch(`${API_URL}/api/v1/assets/${assetId}/reviews`);
+    if (!res.ok) throw new Error("Failed to load reviews");
+    return res.json() as Promise<{
+        results: { rating: number; comment: string | null; createdAt: string; reviewer: { displayName: string; walletAddress: string } }[];
+        total: number;
+        averageRating: number | null;
+    }>;
+}
