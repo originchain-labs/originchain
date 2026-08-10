@@ -164,3 +164,30 @@ export async function getCreatorInsights(creatorId: string, token: string) {
         aiSummary: string | null;
     }>;
 }
+
+export async function getCreatorProfile(id: string) {
+    const res = await fetch(`${API_URL}/api/v1/creators/${id}`);
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error("Failed to load creator");
+    return res.json() as Promise<{
+        id: string;
+        walletAddress: string;
+        displayName: string;
+        bio: string | null;
+        avatarCid: string | null;
+    }>;
+}
+
+export async function updateCreatorProfile(
+    id: string,
+    data: { displayName?: string; bio?: string; avatarCid?: string },
+    token: string
+) {
+    const res = await fetch(`${API_URL}/api/v1/creators/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to update profile");
+    return res.json();
+}
