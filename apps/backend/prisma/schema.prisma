@@ -23,6 +23,8 @@ model Creator {
   onChainConfirmed Boolean @default(false)
   registrationTxHash String? @db.VarChar(66)
   createdAt       DateTime @default(now())
+  reputationScore   Int      @default(0)
+  reputationUpdatedAt DateTime?
 
   @@map("creators")
   @@index([walletAddress])
