@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -36,7 +37,8 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers cookie={cookie}>
           <Header />
-          {children}
+          <main className="flex-1">{children}</main>
+          <Footer />
         </Providers>
       </body>
     </html>
