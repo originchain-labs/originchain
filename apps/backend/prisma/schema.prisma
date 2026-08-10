@@ -20,6 +20,8 @@ model Creator {
   bio             String?
   avatarCid       String?  @db.VarChar(100)
   organizationId  String?
+  organization    Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
+  ownedOrganization Organization? @relation("OrganizationOwner")
   onChainConfirmed Boolean @default(false)
   registrationTxHash String? @db.VarChar(66)
   createdAt       DateTime @default(now())
@@ -31,6 +33,20 @@ model Creator {
 
   assets Asset[]
   reviewsGiven Review[]
+}
+
+
+model Organization {
+  id            String   @id @default(uuid())
+  name          String   @db.VarChar(150)
+  ownerId       String   @unique
+  owner         Creator  @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  walletAddress String?  @unique @db.VarChar(42)
+  createdAt     DateTime @default(now())
+
+  members       Creator[] @relation("OrganizationMembers")
+
+  @@map("organizations")
 }
 
 

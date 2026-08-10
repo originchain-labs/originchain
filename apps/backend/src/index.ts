@@ -6,6 +6,8 @@ import creatorRoutes from "./routes/creator.routes.js";
 import assetRoutes from "./routes/asset.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import searchRoutes from "./routes/search.routes.js";
+import organizationRoutes from "./routes/organization.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import { startCreatorIndexer } from "./indexer/creator-indexer.js";
 import { startAssetIndexer } from "./indexer/asset-indexer.js";
 
@@ -37,3 +39,5 @@ app.use("/api/v1/creators", creatorRoutes);
 app.use("/api/v1/assets", assetRoutes);
 app.use("/api/v1/reviews", reviewRoutes);
 app.use("/api/v1/search", searchRoutes);
+app.use("/api/v1/organizations", organizationRoutes);
+app.use("/api/v1/admin", adminRoutes);
