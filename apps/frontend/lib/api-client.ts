@@ -191,3 +191,13 @@ export async function updateCreatorProfile(
     if (!res.ok) throw new Error("Failed to update profile");
     return res.json();
 }
+
+export async function search(q: string) {
+    const res = await fetch(`${API_URL}/api/v1/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error("Search failed");
+    return res.json() as Promise<{
+        creators: { id: string; displayName: string; walletAddress: string }[];
+        assets: { id: string; title: string; creator: { displayName: string } }[];
+        total: number;
+    }>;
+}
