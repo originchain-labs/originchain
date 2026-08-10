@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getAsset, getCertificate } from "@/lib/api-client";
+import { ReputationBadge } from "@/components/creator/ReputationBadge";
 
 export default async function AssetDetailPage({
     params,
@@ -19,6 +20,7 @@ export default async function AssetDetailPage({
         <div className="mx-auto max-w-xl p-6">
             <h1 className="mb-2 text-xl font-semibold">{asset.title}</h1>
             <p className="mb-4 text-sm text-zinc-500">by {asset.creator.displayName}</p>
+            <ReputationBadge creatorId={asset.creator.id} />
             <p className="mb-1 break-all text-xs text-zinc-500">
                 Content hash: {asset.contentHash}
             </p>

@@ -145,6 +145,6 @@ export async function getAssetReviews(assetId: string) {
 
 export async function getCreatorReputation(creatorId: string) {
     const res = await fetch(`${API_URL}/api/v1/creators/${creatorId}/reputation`);
-    if (!res.ok) return null;
+    if (!res.ok) throw new Error("Failed to load reputation");
     return res.json() as Promise<{ score: number; assetCount: number; reviewCount: number }>;
 }
