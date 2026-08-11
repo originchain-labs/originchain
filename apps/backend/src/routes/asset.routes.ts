@@ -5,7 +5,7 @@ import { listForAsset } from "../controllers/review.controller.js";
 import { requireAuth } from "../middleware/auth.js";
 import { validate } from "../middleware/validate.js";
 import { finalizeMetadataSchema, confirmAssetSchema } from "../validators/asset.validator.js";
-import { aiRateLimiter } from "../middleware/rateLimit.js";
+import { aiRateLimiter, publicRateLimiter } from "../middleware/rateLimit.js";
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -17,10 +17,10 @@ const router = Router();
 router.post("/prepare", requireAuth, aiRateLimiter, upload.single("file"), prepare);
 router.post("/finalize-metadata", requireAuth, validate(finalizeMetadataSchema), finalize);
 router.post("/confirm", requireAuth, validate(confirmAssetSchema), confirm);
-router.get("/", list);
-router.get("/verify", verify);
-router.get("/:id", getOne);
-router.get("/:id/reviews", listForAsset);
-router.get("/:id/certificate", getCertificate);
+router.get("/", publicRateLimiter, list);
+router.get("/verify", publicRateLimiter, verify);
+router.get("/:id", publicRateLimiter, getOne);
+router.get("/:id/reviews", publicRateLimiter, listForAsset);
+router.get("/:id/certificate", publicRateLimiter, getCertificate);
 
 export default router;
