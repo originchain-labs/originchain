@@ -17,17 +17,17 @@ originchain/
 │   │   │   │   ├── creators/        # Browse creators; [id]/ for public creator profile
 │   │   │   │   ├── search/          # Global search results page
 │   │   │   │   └── verify/          # Verification tool; [proofId]/ for certificate verify
-│   │   │   └── (creator)/           # Single authenticated route group (wallet-gated)
-│   │   │       ├── dashboard/       # Creator dashboard
-│   │   │       ├── profile/         # Profile management: create/, edit/ sub-routes
-│   │   │       ├── assets/          # Asset management: upload/ sub-route
-│   │   │       ├── org/             # Organization management: dashboard/ sub-route
-│   │   │       └── admin/           # Admin analytics page (role-gated within (creator))
+│   │   │   ├── (creator)/           # Creator authenticated route group
+│   │   │   │   ├── dashboard/       # Creator dashboard
+│   │   │   │   ├── profile/         # Profile management: create/, edit/ sub-routes
+│   │   │   │   └── assets/          # Asset management: upload/ sub-route
+│   │   │   ├── (org)/               # Organization-role route group
+│   │   │   │   └── dashboard/       # Organization dashboard page (/org/dashboard -> /dashboard)
+│   │   │   └── (admin)/             # Admin route group
+│   │   │       └── page.tsx         # Admin analytics page
 │   │   │
-│   │   │   Note: The original plan had separate (org) and (admin) route groups as
-│   │   │   top-level siblings of (creator). Mid-project simplification: org and admin
-│   │   │   screens were built inside (creator) since they share the same wallet-auth
-│   │   │   guard, making a separate route group an unnecessary layer.
+│   │   │   Note: Route groups (creator), (org), and (admin) are top-level siblings
+│   │   │   under app/. Each route uses RequireAuth per-page for authentication gating.
 │   │   │
 │   │   ├── components/
 │   │   │   ├── ui/                  # shadcn/ui-based primitives (button.tsx)
@@ -46,20 +46,16 @@ originchain/
 │   │   │
 │   │   ├── hooks/
 │   │   │   ├── useAuth.ts           # Wallet auth state: session, connect, sign-in flow
-│   │   │   │                        # (originally planned as useWallet — renamed)
 │   │   │   ├── useCreatorProfile.ts # Fetch/mutate creator profile via api-client
-│   │   │   │                        # (originally planned as useCreator — renamed)
 │   │   │   ├── useAsset.ts          # Upload → hash → AI-suggest → pin → register flow
 │   │   │   ├── useReview.ts         # Submit and list reviews for an asset
-│   │   │   └── useAnalytics.ts      # Fetch creator/admin analytics for dashboard
+│   │   │   ├── useAnalytics.ts      # Fetch creator analytics data for dashboard
+│   │   │   ├── useOrganization.ts   # Fetch/create/update organization state
+│   │   │   ├── useAdmin.ts          # Fetch admin analytics data (null-for-403 handling)
+│   │   │   └── useReputation.ts     # Fetch creator reputation score & breakdown
 │   │   │
-│   │   │   Note: useOrganization, useAdmin, useReputation, useCertificate were planned
-│   │   │   but never built as dedicated hooks — organization, admin, reputation, and
-│   │   │   certificate data are fetched directly in page components via api-client.
-│   │   │   Intentional simplification: the per-entity hook pattern is worth it for
-│   │   │   high-reuse data (profile, assets, reviews), but org/admin/reputation/cert
-│   │   │   are each fetched in exactly one place, making a hook an extra layer with
-│   │   │   no real benefit at current scale.
+│   │   │   Note: Certificate fetching remains direct Server Component data fetching
+│   │   │   in app/(public)/assets/[id]/page.tsx (an async RSC) to maintain SSR/SEO.
 │   │   │
 │   │   ├── lib/
 │   │   │   ├── api-client.ts        # Typed client using packages/shared-types
