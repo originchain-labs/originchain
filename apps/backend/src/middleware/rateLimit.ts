@@ -35,3 +35,22 @@ export const publicRateLimiter = rateLimit({
         },
     },
 });
+
+// Rate limiter for review submissions (10 reviews per hour per wallet address)
+export const reviewRateLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    limit: 10, // 10 review submissions per hour per wallet
+    keyGenerator: (req: AuthedRequest) => {
+        if (req.walletAddress) return req.walletAddress;
+        return ipKeyGenerator(req.ip || "127.0.0.1");
+    },
+    validate: { ip: false },
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        error: {
+            code: "RATE_LIMIT_EXCEEDED",
+            message: "Too many review submissions. Please try again later.",
+        },
+    },
+});
