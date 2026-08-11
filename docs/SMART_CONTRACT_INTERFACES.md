@@ -181,3 +181,43 @@ flowchart LR
 ```
 
 **Deployment order (dependency-driven):** `CreatorRegistry` → `AssetRegistry` → `ReviewRegistry` → `ReputationManager`. Each later contract stores the address of the ones before it and calls them at execution time — deploy addresses must be recorded and wired in immediately after each deployment.
+
+---
+
+## Known Deviations from Original Interface
+
+A comprehensive audit of all four Stylus contracts (`CreatorRegistry`, `AssetRegistry`, `ReviewRegistry`, `ReputationManager`) against the original interface specification identified **4 distinct operational deviations** introduced during contract implementation:
+
+### 1. Dynamic Contract Address Parameters for Cross-Contract Calls
+- **Affected Contracts**: `AssetRegistry`, `ReviewRegistry`, `ReputationManager`
+- **Original Interface Specification**:
+  - `AssetRegistry.registerAsset(hash, ipfsCid, metadataCid)` (3 params)
+  - `ReviewRegistry.submitReview(assetHash, rating, commentCid)` (3 params)
+  - `ReputationManager.recomputeScore(creator)` (1 param)
+- **Implemented Interface Signature**:
+  - `AssetRegistry.register_asset(hash, ipfsCid, metadataCid, creatorRegistry: address)` (4 params)
+  - `ReviewRegistry.submit_review(assetHash, rating, commentCid, creatorRegistry: address, assetRegistry: address)` (5 params)
+  - `ReputationManager.recompute_score(creator: address, assetRegistry: address, reviewRegistry: address)` (3 params)
+- **Rationale**: Passing target contract addresses dynamically on invocation enables flexible contract testing, zero-downtime testnet redeployments, and mock injection in cross-contract calls without hardcoding deployment addresses directly into Rust contract bytecode.
+
+### 2. Flat Tuple Return Types with Explicit Existence Indicators
+- **Affected Contracts**: `CreatorRegistry`, `AssetRegistry`, `ReviewRegistry`
+- **Original Interface Specification**: Documented return types as named Solidity struct wrappers (`CreatorRecord`, `AssetRecord`, `Review`).
+- **Implemented Interface Signature**:
+  - `CreatorRegistry.get_creator(address) → (string, u64, bool)` (`profileCid`, `registeredAt`, `isActive`)
+  - `AssetRegistry.get_asset(hash) → (address, string, string, u64, bool)` (`creator`, `ipfsCid`, `metadataCid`, `registeredAt`, `exists`)
+  - `ReviewRegistry.get_review(assetHash, reviewer) → (u8, string, u64, bool)` (`rating`, `commentCid`, `timestamp`, `exists`)
+- **Rationale**: Stylus ABI serialization for top-level view functions is simplest and most gas-efficient when returning primitive flat tuple values. Adding explicit trailing boolean flags (`exists`/`isActive`) simplifies existence checks for caller contracts without forcing panics or custom revert handlers.
+
+### 3. Explicit Review Rating Range Validation (`InvalidRating`)
+- **Affected Contract**: `ReviewRegistry`
+- **Original Interface Specification**: Parameter type `rating: uint8` with implicit assumption of 1–5 range.
+- **Implemented Interface Signature**: `ReviewRegistry.submit_review` enforces `if rating < 1 || rating > 5 { return Err(ReviewRegistryError::InvalidRating(InvalidRating {})); }`
+- **Rationale**: `uint8` in Rust/Solidity allows values 0–255. Enforcing explicit `InvalidRating` checks in smart contract logic prevents out-of-range ratings on-chain, matching Postgres database check constraints (`DATABASE_SCHEMA.md`).
+
+### 4. Explicit Recomputation Timestamp Getter (`get_last_computed`)
+- **Affected Contract**: `ReputationManager`
+- **Original Interface Specification**: Only `getScore(address) → uint256` documented.
+- **Implemented Interface Signature**: Added `pub fn get_last_computed(&self, creator: Address) -> u64` getter reading `last_computed: mapping(address => uint64)`.
+- **Rationale**: Provides off-chain indexers and frontend components with a direct view function to inspect when a creator's reputation score was last updated on-chain.
+

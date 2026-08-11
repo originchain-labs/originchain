@@ -181,7 +181,7 @@ Fourteen phases, ordered by dependency, reflecting the revised implementation or
 
 ---
 
-## Phase 11 — Security & Hardening 🔶 *(nearly complete — all groups done except full Blockchain Service migration of `asset.service.ts`/`review.service.ts`/`organization.service.ts`, tracked as a follow-up; also surfaced and fixed a real pre-existing bug where `asset-registry-indexer` had never advanced past its deployment block)*
+## Phase 11 — Security & Hardening 🔶 *(essentially complete — every item done except the tracked follow-up of fully migrating `asset.service.ts`/`review.service.ts`/`organization.service.ts` to the Blockchain Service abstraction; also surfaced and fixed a real pre-existing bug where `asset-registry-indexer` had never advanced past its deployment block, and documented 4 real contract deviations from the original interface spec)*
 
 **Goal:** Close the real, currently-open security and robustness gaps that accumulated during feature-focused development — distinct from Phase 12's *visual* polish, since none of this is about how things look.
 

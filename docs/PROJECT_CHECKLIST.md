@@ -133,7 +133,7 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 - [x] Sanitize all user-submitted text (profile bios, review content) — specifically XSS-payload sanitization on stored content, not just Zod shape/length validation (already in place)
 - [x] Run `pnpm audit` and address any real findings (dependency vulnerability scan — never done) — 0 vulnerabilities after applying overrides for hono/postcss/ws/axios/nanoid
 - [x] Ensure deployer/private keys are never committed (confirm `.gitignore` coverage)
-- [ ] Add basic abuse/spam protection on review submission (rate limit + wallet-based)
+- [x] Add basic abuse/spam protection on review submission (rate limit + wallet-based) — 10/hour per wallet, verified against the real configured limit end-to-end
 - [x] Enforce nonce expiration (5 min) and single-use on `/auth/nonce` + `/auth/verify`
 - [x] Add Helmet + Content Security Policy
 - [x] Restrict CORS to deployed frontend origin(s), no wildcard
@@ -144,7 +144,7 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 
 - [x] Add `version` + `schema` fields to all pinned metadata JSON (asset and profile)
 - [x] Write metadata parser that dispatches by `schema`/`version` — tested in isolation, no real call site currently consumes it (nothing re-fetches previously-pinned metadata yet)
-- [ ] Document schema versions as they're introduced in `docs/`
+- [x] Document schema versions as they're introduced in `docs/` (`docs/METADATA_SCHEMA_VERSIONS.md`, verified against a real already-pinned IPFS object's actual content, not just code inspection)
 
 ## Testing *(cross-cutting — no committed automated suite yet, verified via ad-hoc scripts each session instead)*
 
@@ -183,6 +183,6 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 ## Documentation *(cross-cutting)*
 
 - [x] Keep `DEVELOPER_KICKOFF_BLUEPRINT.md` updated as architecture evolves (asset flow section revised for the prepare/finalize-metadata/confirm redesign)
-- [ ] Document any deviation from `SMART_CONTRACT_INTERFACES.md` when contracts are implemented (at least one known deviation exists and needs recording: `ReviewRegistry`'s `InvalidRating` 1-5 check was added during implementation, not in the original interface doc)
+- [x] Document any deviation from `SMART_CONTRACT_INTERFACES.md` when contracts are implemented (4 real deviations found via full audit of all four contracts, recorded in `SMART_CONTRACT_INTERFACES.md`'s new "Known Deviations" section)
 - [x] Maintain `.env.example` files as new secrets are introduced
 - [ ] Write a short demo script for hackathon judges (separate from this pack)
