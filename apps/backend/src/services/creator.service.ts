@@ -9,6 +9,7 @@ import { reviewRegistryAbi } from "@originchain/shared-types/contracts/reviewReg
 import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
 import { generateInsightsSummary } from "./ai/gemini.provider.js";
 import { parseAbiItem } from "viem";
+import { sanitizeText } from "../utils/sanitizer.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -24,11 +25,13 @@ export async function createCreatorProfile(
         throw new Error("PROFILE_ALREADY_EXISTS");
     }
 
+    const sanitizedBio = data.bio ? sanitizeText(data.bio) : null;
+
     const profileMetadata = {
         version: 1,
         schema: "originchain.profile.v1",
         displayName: data.displayName,
-        bio: data.bio ?? "",
+        bio: sanitizedBio ?? "",
         avatarCid: data.avatarCid ?? "",
     };
     const { cid: profileCid } = await storageService.pinJSON(profileMetadata);
@@ -37,7 +40,7 @@ export async function createCreatorProfile(
         data: {
             walletAddress,
             displayName: data.displayName,
-            bio: data.bio ?? null,
+            bio: sanitizedBio,
             avatarCid: data.avatarCid ?? null,
             onChainConfirmed: false, // indexer flips this once the tx confirms
         },
@@ -75,11 +78,13 @@ export async function updateCreatorProfile(
     if (!creator) throw new Error("CREATOR_NOT_FOUND");
     if (creator.walletAddress !== requesterWalletAddress) throw new Error("FORBIDDEN");
 
+    const sanitizedBio = data.bio !== undefined ? sanitizeText(data.bio) : undefined;
+
     return prisma.creator.update({
         where: { id },
         data: {
             ...(data.displayName !== undefined && { displayName: data.displayName }),
-            ...(data.bio !== undefined && { bio: data.bio }),
+            ...(sanitizedBio !== undefined && { bio: sanitizedBio }),
             ...(data.avatarCid !== undefined && { avatarCid: data.avatarCid }),
         },
     });

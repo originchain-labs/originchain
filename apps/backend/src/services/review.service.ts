@@ -5,6 +5,7 @@ import { arbitrumSepolia } from "viem/chains";
 import { decodeFunctionData } from "viem";
 import { reviewRegistryAbi } from "@originchain/shared-types/contracts/reviewRegistry";
 import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { sanitizeText } from "../utils/sanitizer.js";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 const chainClient = createPublicClient({ chain: arbitrumSepolia, transport: http(process.env.RPC_URL) });
@@ -60,8 +61,10 @@ export async function submitReview(
         throw new Error("TX_MISMATCH");
     }
 
+    const sanitizedComment = comment ? sanitizeText(comment) : null;
+
     return prisma.review.create({
-        data: { assetId, reviewerId: reviewer.id, rating, comment: comment ?? null, txHash },
+        data: { assetId, reviewerId: reviewer.id, rating, comment: sanitizedComment, txHash },
     });
 }
 
