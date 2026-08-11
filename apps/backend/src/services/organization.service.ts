@@ -1,13 +1,12 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
-import { createPublicClient, http, parseAbiItem } from "viem";
-import { arbitrumSepolia } from "viem/chains";
+import { parseAbiItem } from "viem";
 import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { getBlockNumber } from "./blockchain/read.js";
+import { getLogs } from "./blockchain/events.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
-
-const chainClient = createPublicClient({ chain: arbitrumSepolia, transport: http(process.env.RPC_URL) });
 
 const CREATOR_REGISTRY_DEPLOYMENT_BLOCK = 294428245n;
 const ASSET_REGISTRY_DEPLOYMENT_BLOCK = 295920616n;
@@ -51,27 +50,36 @@ export async function updateOrganization(id: string, requesterId: string, name: 
 }
 
 export async function getAdminAnalytics() {
-  const toBlock = await chainClient.getBlockNumber();
+  const toBlock = await getBlockNumber();
 
   const [creatorLogs, assetLogs, reviewLogs] = await Promise.all([
-    chainClient.getLogs({
-      address: CONTRACT_ADDRESSES.arbitrumSepolia.creatorRegistry as `0x${string}`,
-      event: creatorRegisteredEvent,
-      fromBlock: CREATOR_REGISTRY_DEPLOYMENT_BLOCK,
-      toBlock,
-    }),
-    chainClient.getLogs({
-      address: CONTRACT_ADDRESSES.arbitrumSepolia.assetRegistry as `0x${string}`,
-      event: assetRegisteredEvent,
-      fromBlock: ASSET_REGISTRY_DEPLOYMENT_BLOCK,
-      toBlock,
-    }),
-    chainClient.getLogs({
-      address: CONTRACT_ADDRESSES.arbitrumSepolia.reviewRegistry as `0x${string}`,
-      event: reviewSubmittedEvent,
-      fromBlock: ASSET_REGISTRY_DEPLOYMENT_BLOCK,
-      toBlock,
-    }),
+    getLogs(
+      {
+        address: CONTRACT_ADDRESSES.arbitrumSepolia.creatorRegistry as `0x${string}`,
+        event: creatorRegisteredEvent,
+        fromBlock: CREATOR_REGISTRY_DEPLOYMENT_BLOCK,
+        toBlock,
+      },
+      { maxBlockRange: 1_000_000n }
+    ),
+    getLogs(
+      {
+        address: CONTRACT_ADDRESSES.arbitrumSepolia.assetRegistry as `0x${string}`,
+        event: assetRegisteredEvent,
+        fromBlock: ASSET_REGISTRY_DEPLOYMENT_BLOCK,
+        toBlock,
+      },
+      { maxBlockRange: 1_000_000n }
+    ),
+    getLogs(
+      {
+        address: CONTRACT_ADDRESSES.arbitrumSepolia.reviewRegistry as `0x${string}`,
+        event: reviewSubmittedEvent,
+        fromBlock: ASSET_REGISTRY_DEPLOYMENT_BLOCK,
+        toBlock,
+      },
+      { maxBlockRange: 1_000_000n }
+    ),
   ]);
 
   return {

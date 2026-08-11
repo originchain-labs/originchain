@@ -1,14 +1,12 @@
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { createPublicClient, http } from "viem";
-import { arbitrumSepolia } from "viem/chains";
 import { decodeFunctionData } from "viem";
 import { reviewRegistryAbi } from "@originchain/shared-types/contracts/reviewRegistry";
 import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
 import { sanitizeText } from "../utils/sanitizer.js";
+import { getTransactionReceipt, getTransaction } from "./blockchain/read.js";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
-const chainClient = createPublicClient({ chain: arbitrumSepolia, transport: http(process.env.RPC_URL) });
 const REVIEW_REGISTRY = CONTRACT_ADDRESSES.arbitrumSepolia.reviewRegistry.toLowerCase();
 
 export async function submitReview(
@@ -29,7 +27,7 @@ export async function submitReview(
     });
     if (existing) throw new Error("ALREADY_REVIEWED");
 
-    const receipt = await chainClient.getTransactionReceipt({ hash: txHash }).catch(() => null);
+    const receipt = await getTransactionReceipt({ hash: txHash }).catch(() => null);
     if (!receipt || receipt.status !== "success") {
         throw new Error("TX_NOT_FOUND_ON_CHAIN");
     }
@@ -41,7 +39,7 @@ export async function submitReview(
         throw new Error("TX_MISMATCH");
     }
 
-    const tx = await chainClient.getTransaction({ hash: txHash });
+    const tx = await getTransaction({ hash: txHash });
     let decoded;
     try {
         decoded = decodeFunctionData({ abi: reviewRegistryAbi, data: tx.input });

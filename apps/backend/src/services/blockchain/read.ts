@@ -30,3 +30,75 @@ export async function readContract<TParams extends ReadContractParameters>(
     }
   }
 }
+
+export async function getBlockNumber(): Promise<bigint> {
+  let attempt = 0;
+
+  while (true) {
+    attempt++;
+    try {
+      return await chainClient.getBlockNumber();
+    } catch (rawError) {
+      const translated = translateError(rawError);
+
+      if (translated instanceof RpcUnavailableError && attempt <= MAX_RETRIES) {
+        const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
+        console.warn(
+          `[blockchain/read] getBlockNumber Attempt ${attempt}/${MAX_RETRIES + 1} failed (${translated.message}). Retrying in ${backoffMs}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
+      throw translated;
+    }
+  }
+}
+
+export async function getTransactionReceipt(params: { hash: `0x${string}` }): Promise<any> {
+  let attempt = 0;
+
+  while (true) {
+    attempt++;
+    try {
+      return await chainClient.getTransactionReceipt(params);
+    } catch (rawError) {
+      const translated = translateError(rawError);
+
+      if (translated instanceof RpcUnavailableError && attempt <= MAX_RETRIES) {
+        const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
+        console.warn(
+          `[blockchain/read] getTransactionReceipt Attempt ${attempt}/${MAX_RETRIES + 1} failed (${translated.message}). Retrying in ${backoffMs}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
+      throw translated;
+    }
+  }
+}
+
+export async function getTransaction(params: { hash: `0x${string}` }): Promise<any> {
+  let attempt = 0;
+
+  while (true) {
+    attempt++;
+    try {
+      return await chainClient.getTransaction(params);
+    } catch (rawError) {
+      const translated = translateError(rawError);
+
+      if (translated instanceof RpcUnavailableError && attempt <= MAX_RETRIES) {
+        const backoffMs = INITIAL_BACKOFF_MS * Math.pow(2, attempt - 1);
+        console.warn(
+          `[blockchain/read] getTransaction Attempt ${attempt}/${MAX_RETRIES + 1} failed (${translated.message}). Retrying in ${backoffMs}ms...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        continue;
+      }
+
+      throw translated;
+    }
+  }
+}

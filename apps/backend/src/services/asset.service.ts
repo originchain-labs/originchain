@@ -1,18 +1,12 @@
 import { PrismaClient } from "../generated/prisma/client.js";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { createPublicClient, http } from "viem";
-import { arbitrumSepolia } from "viem/chains";
 import { createHash } from "crypto";
 import { storageService } from "./storage/index.js";
 import { suggestMetadata } from "./ai/gemini.provider.js";
 import { detectAndValidateFileType, sanitizeFileName, validateImageBuffer } from "../utils/upload-validator.js";
+import { getTransactionReceipt } from "./blockchain/read.js";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
-
-const chainClient = createPublicClient({
-    chain: arbitrumSepolia,
-    transport: http(process.env.RPC_URL),
-});
 
 export async function prepareAsset(
     fileBuffer: Buffer,
@@ -66,7 +60,7 @@ export async function confirmAsset(
     const existing = await prisma.asset.findUnique({ where: { contentHash } });
     if (existing) throw new Error("ASSET_ALREADY_REGISTERED");
 
-    const receipt = await chainClient.getTransactionReceipt({ hash: txHash }).catch(() => null);
+    const receipt = await getTransactionReceipt({ hash: txHash }).catch(() => null);
     if (!receipt || receipt.status !== "success") {
         throw new Error("TX_NOT_FOUND_ON_CHAIN");
     }
