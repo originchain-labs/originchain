@@ -159,10 +159,10 @@ Base path: `/api/v1`. All authenticated routes require a session token issued vi
 ## Search
 
 ### `GET /search`
-- **Description:** Unified search across creators, assets, and tags — powers the global search bar.
+- **Description:** Unified search across creators, assets, and tags — powers the global search bar. Assets match on title **or** any of their associated tag names (case-insensitive). Each returned asset includes a `tags` array of its actual stored tag names.
 - **Auth:** None
 - **Request (query):** `?q=string&type=creators|assets|tags|all&page=1&limit=20`
-- **Response:** `{ creators: [...], assets: [...], tags: [...], page, total }` (only populated arrays for the requested `type`, or all three if `type=all`)
+- **Response:** `{ creators: [...], assets: [...], tags: [...], page, total }` — `tags` is a real array of `Tag` rows (`{ id, name }`) matching the query; `assets[].tags` is a real array of tag name strings for each matched asset.
 - **Errors:** `400 QUERY_TOO_SHORT` (minimum 2 characters)
 
 ---

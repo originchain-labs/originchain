@@ -79,6 +79,32 @@ export async function confirmAsset(
         },
     });
 
+    // Persist tags relationally — normalize to lowercase for consistent deduplication.
+    // Tags from finalMetadata.tags are the same array already pinned to IPFS; no new AI call needed.
+    const rawTags = finalMetadata.tags ?? [];
+    const normalizedTags = rawTags
+        .map((t) => t.trim().toLowerCase())
+        .filter((t) => t.length > 0);
+
+    if (normalizedTags.length > 0) {
+        await Promise.all(
+            normalizedTags.map(async (name) => {
+                // Upsert: find existing tag row or create it. Unique constraint on name prevents duplicates.
+                const tag = await prisma.tag.upsert({
+                    where: { name },
+                    update: {},
+                    create: { name },
+                });
+                // Link this asset to the tag (composite PK on [assetId, tagId] prevents duplicate join rows).
+                await prisma.assetTag.upsert({
+                    where: { assetId_tagId: { assetId: asset.id, tagId: tag.id } },
+                    update: {},
+                    create: { assetId: asset.id, tagId: tag.id },
+                });
+            })
+        );
+    }
+
     return asset;
 }
 
