@@ -1,6 +1,6 @@
 # OriginChain — Development Roadmap
 
-Twelve phases, ordered by dependency, reflecting the revised implementation order adopted during Phase 0 kickoff (frontend/backend skeleton and wallet auth were moved earlier than in the original draft, since wallet auth is the foundation every other feature depends on) plus a dedicated Design & Polish phase added before deployment. Each phase lists its goal, deliverables, dependencies, and what "done" means.
+Fourteen phases, ordered by dependency, reflecting the revised implementation order adopted during Phase 0 kickoff (frontend/backend skeleton and wallet auth were moved earlier than in the original draft, since wallet auth is the foundation every other feature depends on), a dedicated Design & Polish phase added before deployment, and a later split of Organization/Admin screens (a real scope gap, never previously phased) and Security & Hardening (previously miscategorized as part of visual polish) into their own phases. Each phase lists its goal, deliverables, dependencies, and what "done" means.
 
 **Status key:** ✅ Complete · 🔶 In Progress · ⬜ Not Started
 
@@ -105,7 +105,7 @@ Twelve phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 6 — Verification 🔶 *(next up)*
+## Phase 6 — Verification ✅
 
 **Goal:** Public, wallet-free proof verification — the trust-building feature for non-technical visitors and judges.
 
@@ -120,7 +120,7 @@ Twelve phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 7 — Reviews ⬜
+## Phase 7 — Reviews ✅
 
 **Goal:** Sybil-resistant review layer on registered assets.
 
@@ -135,7 +135,7 @@ Twelve phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 8 — Reputation ⬜
+## Phase 8 — Reputation ✅
 
 **Goal:** Aggregate trust score built from asset and review activity.
 
@@ -150,7 +150,7 @@ Twelve phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 9 — AI Features ⬜
+## Phase 9 — AI Features ✅
 
 **Goal:** Deepen the AI layer beyond basic metadata tagging (first introduced in Phase 5).
 
@@ -165,26 +165,69 @@ Twelve phases, ordered by dependency, reflecting the revised implementation orde
 
 ---
 
-## Phase 10 — Design & Polish ⬜
+## Phase 10 — Organization & Admin Screens ✅
 
-**Goal:** Move from bare-bones functional UI (plain buttons, unstyled forms — what every prior phase has shipped) to a visually polished, demo-ready product. This is deliberately scoped as its own phase rather than spread across feature phases, so functional correctness isn't blocked on visual iteration, and so polish happens once against a stable, complete feature set rather than being redone repeatedly as features change.
+**Goal:** Build the two user-facing surfaces described in the project's original scope (`DEVELOPER_KICKOFF_BLUEPRINT.md` targets creators, visitors/collectors, organizations, and administrators) that were never actually scheduled into a phase — a genuine gap identified late, not a deferred/deprioritized item.
+
+**Deliverables:**
+- `organizations` table (sketched in `DATABASE_SCHEMA.md`, never implemented — currently `Creator.organizationId` is a plain unrelated field with no backing table)
+- Admin role mechanism — some way to designate a wallet/creator as an admin (currently no role concept exists anywhere in the schema or auth layer)
+- Backend: organization CRUD endpoints, `GET /admin/analytics` (documented in `API_SPECIFICATION.md`, never built)
+- Frontend: organization dashboard screen(s), admin dashboard screen(s)
+
+**Dependencies:** Phase 3 (Creator Profile — organizations relate to creators), Phase 9 (reuses the insights/analytics patterns already built for creators).
+
+**Completion Criteria:** An organization can be created and see its member creators; an admin-designated wallet can view platform-wide stats (`totalCreators`, `totalAssets`, `totalVerifications`, `dailyActive`) via `/admin/analytics`.
+
+---
+
+## Phase 11 — Security & Hardening 🔶 *(nearly complete — all groups done except full Blockchain Service migration of `asset.service.ts`/`review.service.ts`/`organization.service.ts`, tracked as a follow-up; also surfaced and fixed a real pre-existing bug where `asset-registry-indexer` had never advanced past its deployment block)*
+
+**Goal:** Close the real, currently-open security and robustness gaps that accumulated during feature-focused development — distinct from Phase 12's *visual* polish, since none of this is about how things look.
+
+**Deliverables:**
+- Upload validation: actual MIME-type checking (not just extension), image re-encoding before pinning
+- Text sanitization: profile bios, review comments — specifically XSS-payload sanitization on stored/rendered content (Zod already validates shape/length, this is a distinct concern)
+- Abuse/spam protection on review submission (rate limit + wallet-based, beyond the existing `/assets/prepare` limiter)
+- Helmet + Content Security Policy headers (also closes clickjacking via `X-Frame-Options`/`frame-ancestors`)
+- Explicit CORS allow-list review (already restricted to frontend origin — confirm no gaps)
+- Structured request logging
+- Centralized error-handling middleware
+- Required env vars validated at startup (fail fast, not on first request)
+- `Blockchain Service` abstraction (`services/blockchain/`) — the engineering-review recommendation from early in the project (contract registry, tx executor, gas estimation, retries, event decoding, chain-error translation) was never implemented; the backend still calls contracts directly per-service. A real architectural decision: worth doing now while there are only 4-5 services calling contracts directly, before it's 10+.
+- Small ops/debug endpoints: `GET /health`, `GET /contracts` (`GET /search` already completed in an earlier session)
+- Metadata version-dispatch parser (reads `schema`/`version` fields already written to pinned JSON, but nothing currently branches on them)
+- Database: seed script for local dev, IPFS pinning retention policy documented
+- `pnpm audit` dependency vulnerability scan — never run, worth a pass
+- **Explicitly out of scope, reconciled against a generic security checklist:** password/email/OAuth/2FA/CAPTCHA (wrong auth model — SIWE has none of this), CSRF tokens/cookie-based session hardening (wrong session model — Bearer JWT, not cookies), HTTPS/HSTS (handled automatically by Vercel/Railway once deployed, not application code)
+
+**Dependencies:** All feature phases (3–10) — hardening what already exists, not blocking new feature work.
+
+**Completion Criteria:** No unvalidated user input reaches storage/IPFS/the database; a env-misconfigured startup fails immediately with a clear error rather than failing confusingly on first request; contract-calling code is centralized rather than duplicated per-service.
+
+---
+
+## Phase 12 — Design & Polish ⬜
+
+**Goal:** Move from bare-bones functional UI (plain buttons, unstyled forms — what every prior phase has shipped) to a visually polished, demo-ready product. Deliberately scoped as its own phase, purely visual/UX — separated from Phase 11's security work, which was previously (incorrectly) bundled in here.
 
 **Deliverables:**
 - Consistent visual design system applied across all screens (leveraging the shadcn/ui + Base UI + Nova preset + Zinc palette foundation set in Phase 1)
-- Real styling for: wallet connect header, creator profile creation/edit, asset upload/browse, verification page, review/reputation displays
+- Real styling for: wallet connect header, creator profile creation/edit, asset upload/browse, verification page, review/reputation displays, organization/admin screens (Phase 10)
 - Responsive/mobile-friendly pass
 - Loading states, empty states, and error states designed (not just functional) across all flows
 - Landing/homepage replacing the default Next.js starter content
 - Micro-interactions/animation pass using Framer Motion (installed since Phase 1, unused so far)
 - Proof of Origin Certificate visual design (the shareable artifact from Phase 5)
+- Shared layout components: footer, auth-gated route wrapper (nav/header already exists)
 
-**Dependencies:** All feature phases (3–9) substantially complete — polishing before features exist means redoing work as flows change.
+**Dependencies:** All feature phases (3–11) substantially complete — polishing before features exist means redoing work as flows change.
 
 **Completion Criteria:** Every screen a demo audience or judge would see looks intentional and cohesive, not like default framework scaffolding. A non-technical person could navigate the app without confusion about what's clickable, what's loading, or what went wrong when something fails.
 
 ---
 
-## Phase 11 — Deployment ⬜
+## Phase 13 — Deployment ⬜
 
 **Goal:** Stable, demo-ready deployed environment.
 
@@ -210,15 +253,19 @@ flowchart TD
     P3 --> P4[Phase 4: IPFS Integration done]
     P3 --> P5[Phase 5: Asset Registration done]
     P4 --> P5
-    P5 --> P6[Phase 6: Verification next]
-    P5 --> P7[Phase 7: Reviews]
+    P5 --> P6[Phase 6: Verification done]
+    P5 --> P7[Phase 7: Reviews done]
     P3 --> P7
-    P7 --> P8[Phase 8: Reputation]
-    P5 --> P9[Phase 9: AI Features]
+    P7 --> P8[Phase 8: Reputation done]
+    P5 --> P9[Phase 9: AI Features done]
     P8 --> P9
-    P6 --> P10[Phase 10: Design & Polish]
-    P7 --> P10
-    P8 --> P10
+    P3 --> P10[Phase 10: Org and Admin Screens next]
     P9 --> P10
-    P10 --> P11[Phase 11: Deployment]
+    P6 --> P11[Phase 11: Security and Hardening]
+    P7 --> P11
+    P8 --> P11
+    P9 --> P11
+    P10 --> P11
+    P11 --> P12[Phase 12: Design and Polish]
+    P12 --> P13[Phase 13: Deployment]
 ```
