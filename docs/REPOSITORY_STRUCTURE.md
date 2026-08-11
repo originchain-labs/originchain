@@ -1,66 +1,146 @@
 # OriginChain — Repository Structure
 
-Full annotated monorepo layout.
+Full annotated monorepo layout. **Last reconciled against real implementation: August 2026.**
+
+> [!NOTE]
+> This document was originally written at project kickoff and has been updated to match the actual implemented structure. Where the implementation diverged from the original plan for a deliberate engineering reason, the rationale is noted inline.
 
 ```
 originchain/
 │
 ├── apps/
 │   │
-│   ├── frontend/                    # Next.js creator/visitor/org/admin app
-│   │   ├── app/                     # App Router: routes for all 16 screens
-│   │   │   ├── (public)/            # No-wallet-required routes (verify, browse, landing)
-│   │   │   ├── (creator)/           # Creator-only authenticated routes
-│   │   │   ├── (org)/               # Organization-role routes
-│   │   │   └── (admin)/             # Admin routes
+│   ├── frontend/                    # Next.js creator/visitor/admin app
+│   │   ├── app/                     # App Router
+│   │   │   ├── (public)/            # No-wallet-required routes
+│   │   │   │   ├── assets/          # Browse all assets; [id]/ for asset detail page
+│   │   │   │   ├── creators/        # Browse creators; [id]/ for public creator profile
+│   │   │   │   ├── search/          # Global search results page
+│   │   │   │   └── verify/          # Verification tool; [proofId]/ for certificate verify
+│   │   │   └── (creator)/           # Single authenticated route group (wallet-gated)
+│   │   │       ├── dashboard/       # Creator dashboard
+│   │   │       ├── profile/         # Profile management: create/, edit/ sub-routes
+│   │   │       ├── assets/          # Asset management: upload/ sub-route
+│   │   │       ├── org/             # Organization management: dashboard/ sub-route
+│   │   │       └── admin/           # Admin analytics page (role-gated within (creator))
+│   │   │
+│   │   │   Note: The original plan had separate (org) and (admin) route groups as
+│   │   │   top-level siblings of (creator). Mid-project simplification: org and admin
+│   │   │   screens were built inside (creator) since they share the same wallet-auth
+│   │   │   guard, making a separate route group an unnecessary layer.
+│   │   │
 │   │   ├── components/
-│   │   │   ├── ui/                  # shadcn/ui-based primitives
-│   │   │   ├── wallet/              # Connect button, network guard, session state
-│   │   │   ├── asset/               # Upload, hash preview, registration flow
-│   │   │   ├── review/              # Review form, review list, rating display
-│   │   │   └── analytics/           # Charts, dashboard widgets
-│   │   ├── hooks/                   # Data/state hooks — see below for responsibilities
-│   │   │   ├── useWallet.ts
-│   │   │   ├── useCreator.ts
-│   │   │   ├── useAsset.ts
-│   │   │   ├── useReview.ts
-│   │   │   └── useAnalytics.ts
+│   │   │   ├── ui/                  # shadcn/ui-based primitives (button.tsx)
+│   │   │   ├── auth/                # Auth guards (RequireAuth.tsx)
+│   │   │   ├── asset/               # Asset-related components (ReviewSection.tsx)
+│   │   │   ├── creator/             # Creator-specific components (ReputationBadge.tsx)
+│   │   │   ├── charts/              # Chart system (visx-based, many files)
+│   │   │   ├── layout/              # Shared layout components (header.tsx, footer.tsx)
+│   │   │   └── shimmering-text.tsx  # Standalone animated text utility component
+│   │   │
+│   │   │   Note: Original plan listed wallet/, review/, analytics/ subfolders.
+│   │   │   Reality: wallet connect UI is handled inline via RainbowKit/wagmi (no
+│   │   │   separate folder needed); review components live in asset/; chart/analytics
+│   │   │   components live in charts/; auth guards are in auth/; creator-specific
+│   │   │   components are in creator/.
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts           # Wallet auth state: session, connect, sign-in flow
+│   │   │   │                        # (originally planned as useWallet — renamed)
+│   │   │   ├── useCreatorProfile.ts # Fetch/mutate creator profile via api-client
+│   │   │   │                        # (originally planned as useCreator — renamed)
+│   │   │   ├── useAsset.ts          # Upload → hash → AI-suggest → pin → register flow
+│   │   │   ├── useReview.ts         # Submit and list reviews for an asset
+│   │   │   └── useAnalytics.ts      # Fetch creator/admin analytics for dashboard
+│   │   │
+│   │   │   Note: useOrganization, useAdmin, useReputation, useCertificate were planned
+│   │   │   but never built as dedicated hooks — organization, admin, reputation, and
+│   │   │   certificate data are fetched directly in page components via api-client.
+│   │   │   Intentional simplification: the per-entity hook pattern is worth it for
+│   │   │   high-reuse data (profile, assets, reviews), but org/admin/reputation/cert
+│   │   │   are each fetched in exactly one place, making a hook an extra layer with
+│   │   │   no real benefit at current scale.
+│   │   │
 │   │   ├── lib/
 │   │   │   ├── api-client.ts        # Typed client using packages/shared-types
 │   │   │   ├── hash.ts              # Client-side content hashing utility
-│   │   │   └── wagmi-config.ts      # Chain/wallet configuration
+│   │   │   ├── wagmi-config.ts      # Chain/wallet configuration
+│   │   │   ├── session.ts           # Session state helpers (token read/write)
+│   │   │   ├── utils.ts             # Shared utility functions (cn/classnames)
+│   │   │   └── x402-empty-stub.ts   # Stub for x402 payment protocol (future scope)
 │   │   ├── public/
-│   │   ├── styles/
 │   │   ├── .env.example
 │   │   └── package.json
 │   │
 │   └── backend/                     # Express API + indexer worker
+│       ├── prisma/
+│       │   ├── schema.prisma        # Prisma schema — source of truth for DB shape
+│       │   └── seed.ts              # Dev database seed script (pnpm prisma db seed)
 │       ├── src/
 │       │   ├── routes/              # One file per resource — thin, delegates to controllers
+│       │   │   ├── asset.routes.ts
+│       │   │   ├── auth.routes.ts
+│       │   │   ├── creator.routes.ts
+│       │   │   ├── admin.routes.ts
+│       │   │   ├── organization.routes.ts
+│       │   │   ├── review.routes.ts
+│       │   │   ├── search.routes.ts
+│       │   │   └── ops.routes.ts    # GET /health, GET /contracts operational endpoints
 │       │   ├── controllers/         # Request/response handling, calls services, no business logic itself
 │       │   ├── validators/          # Input validation schemas (zod), one per resource — see below
+│       │   ├── config/
+│       │   │   └── env-validator.ts # Fail-fast env var presence check at startup
+│       │   ├── utils/
+│       │   │   ├── metadata-parser.ts   # Version-dispatch parser for pinned metadata JSON
+│       │   │   ├── sanitizer.ts         # Input sanitization helpers
+│       │   │   └── upload-validator.ts  # MIME/file content validation before pinning
 │       │   ├── services/
 │       │   │   ├── blockchain/      # Blockchain Service — sole owner of chain interaction
-│       │   │   │   ├── contracts.ts       # Address + ABI registry
-│       │   │   │   ├── tx-executor.ts     # Transaction execution, gas estimation, retries
-│       │   │   │   ├── event-decoder.ts   # Decodes raw logs into typed events
+│       │   │   │   ├── registry.ts        # Single shared chainClient + contract address/ABI bundle
+│       │   │   │   ├── read.ts            # readContract, getBlockNumber, getTransaction(Receipt) with retries
+│       │   │   │   ├── events.ts          # getLogs with chunked range splitting (100k–1M block chunks)
 │       │   │   │   └── errors.ts          # Translates chain errors into API error codes
+│       │   │   │
+│       │   │   │   Note: Original plan listed contracts.ts, tx-executor.ts, event-decoder.ts,
+│       │   │   │   errors.ts. Reality: contracts.ts → registry.ts (holds both addresses and
+│       │   │   │   chainClient); tx-executor.ts was never built (backend is read-only — all
+│       │   │   │   writes are signed/broadcast from the frontend via wagmi); event-decoder.ts
+│       │   │   │   → events.ts (chunked getLogs, not a raw log decoder).
+│       │   │   │
 │       │   │   ├── storage/         # Storage Service — sole owner of pinning/retrieval
 │       │   │   │   ├── storage.interface.ts
+│       │   │   │   ├── index.ts
 │       │   │   │   └── providers/
-│       │   │   │       └── pinata.provider.ts   # Current implementation; future providers added here
-│       │   │   ├── ai/              # AI Provider Layer — see below
-│       │   │   │   ├── provider/            # Provider interface + implementations (openai, future: claude, gemini, local)
-│       │   │   │   ├── metadata/            # Metadata generation orchestration
-│       │   │   │   ├── tags/                # Tag suggestion orchestration
-│       │   │   │   ├── descriptions/        # Description generation orchestration
-│       │   │   │   ├── analytics/           # AI-assisted analytics summaries
-│       │   │   │   └── prompts/             # Centralized prompt templates
-│       │   │   └── certificate/     # Proof of Origin Certificate generation (PDF/image + QR)
-│       │   ├── indexer/             # Long-running worker: listens via Blockchain Service, writes to Postgres
-│       │   ├── middleware/          # Auth, error handling, rate limiting, Helmet/CSP/CORS config
-│       │   ├── prisma/
-│       │   │   └── schema.prisma
+│       │   │   │       └── pinata.provider.ts
+│       │   │   ├── ai/              # AI Provider Layer
+│       │   │   │   └── gemini.provider.ts  # Single Gemini provider (metadata generation)
+│       │   │   │
+│       │   │   │   Note: Original plan showed a subfolder abstraction (provider/,
+│       │   │   │   metadata/, tags/, descriptions/, analytics/, prompts/). Reality:
+│       │   │   │   a single flat gemini.provider.ts file. The multi-subfolder structure
+│       │   │   │   was designed for multi-provider + per-concern orchestration; at one
+│       │   │   │   provider (Gemini) and one concern (metadata generation), the extra
+│       │   │   │   directories would be empty scaffolding with no benefit.
+│       │   │   │
+│       │   │   ├── auth/            # Auth service layer
+│       │   │   │   ├── auth.service.ts
+│       │   │   │   └── nonce-store.ts
+│       │   │   ├── certificate/     # Proof of Origin Certificate generation (PDF + QR)
+│       │   │   │   └── certificate.service.ts
+│       │   │   ├── asset.service.ts
+│       │   │   ├── creator.service.ts
+│       │   │   ├── organization.service.ts
+│       │   │   ├── review.service.ts
+│       │   │   └── search.service.ts
+│       │   ├── indexer/             # Long-running workers: poll chain, write to Postgres
+│       │   │   ├── creator-indexer.ts
+│       │   │   └── asset-indexer.ts
+│       │   ├── middleware/          # Auth, error handling, rate limiting, CORS config
+│       │   │   ├── auth.ts
+│       │   │   ├── adminAuth.ts
+│       │   │   ├── errorHandler.ts
+│       │   │   ├── rateLimit.ts
+│       │   │   └── validate.ts
 │       │   └── index.ts
 │       ├── .env.example
 │       └── package.json
@@ -86,7 +166,8 @@ originchain/
 │   │   ├── src/
 │   │   │   ├── api/                  # Request/response types matching API_SPECIFICATION.md
 │   │   │   ├── contracts/             # ABI-derived TS types
-│   │   │   └── constants.ts           # Deployed contract addresses per network
+│   │   │   ├── constants.ts           # Deployed contract addresses per network
+│   │   │   └── index.ts
 │   │   └── package.json
 │   │
 │   └── config/                        # Shared tooling config
@@ -94,7 +175,7 @@ originchain/
 │       ├── eslint-preset.js
 │       └── prettier.config.js
 │
-├── docs/                               # This kickoff pack + evolving architecture docs
+├── docs/                               # Architecture docs, reconciled per-session
 │   ├── DEVELOPER_KICKOFF_BLUEPRINT.md
 │   ├── PROJECT_CHECKLIST.md
 │   ├── REPOSITORY_STRUCTURE.md
@@ -102,16 +183,23 @@ originchain/
 │   ├── API_SPECIFICATION.md
 │   ├── SMART_CONTRACT_INTERFACES.md
 │   ├── DEVELOPMENT_ROADMAP.md
+│   ├── METADATA_SCHEMA_VERSIONS.md    # Added during Phase 11 — pinned metadata schema spec
 │   └── TEAM_TASK_DISTRIBUTION.md
 │
 ├── scripts/                            # One-off / operational scripts
-│   ├── deploy-contracts.sh
-│   ├── seed-db.ts
-│   └── sync-constants.ts               # Writes deployed addresses into shared-types/constants.ts
+│   └── (currently empty — .gitkeep)
 │
-├── .github/                            # Reserved — issue templates/workflows added in next phase
+│   Note: Original plan listed deploy-contracts.sh, seed-db.ts, sync-constants.ts here.
+│   Reality: the seed script lives at apps/backend/prisma/seed.ts (Prisma convention,
+│   invoked via `pnpm prisma db seed`); deploy and sync-constants scripts were never
+│   written (deployment happened manually via cargo deploy / direct RPC calls during
+│   the hackathon build; contract addresses were updated in shared-types/constants.ts
+│   directly). These could be backfilled as real operational needs arise.
+│
+├── .github/                            # Reserved — currently empty
 │
 ├── .gitignore
+├── pnpm-workspace.yaml                 # pnpm workspace manifest (apps/*, packages/*)
 ├── package.json                        # Root workspace manifest
 └── README.md
 ```
@@ -125,23 +213,23 @@ originchain/
 | `packages/shared-types` | Prevents frontend/backend type drift — a single place defines what an "Asset" or "Creator" object looks like |
 | Indexer lives inside `apps/backend/src/indexer`, not a separate app | At 3 people and hackathon scope, a separate deployable indexer service is premature; keep it as a worker process spawned by the backend for now, split out later if load requires it |
 | `.github/` reserved but empty | Explicitly out of scope for this phase per project plan — placeholder only |
-| `services/blockchain/` as a dedicated layer | Isolates all contract-address/ABI/gas/retry/event-decoding concerns from route handlers — route code should never `import` a contract ABI directly |
-| `services/storage/` with a `providers/` subfolder | The backend depends on `storage.interface.ts`, never on Pinata directly — swapping or adding a provider later touches only the `providers/` folder |
-| `services/ai/` split by concern (`provider/`, `metadata/`, `tags/`, etc.) | `provider/` isolates which LLM vendor is called; the other folders contain orchestration logic that stays identical regardless of provider — this is what makes switching OpenAI → Claude/Gemini/local a config change, not a rewrite |
+| `services/blockchain/` as a dedicated layer | Isolates all contract-address/ABI/retry/event-decoding concerns from route handlers — route code should never `import` a contract ABI directly. Backend is read-only (all writes are signed/broadcast from the frontend via wagmi), so no tx-executor was needed. |
+| `services/storage/` with a `providers/` subfolder | The backend depends on `storage.interface.ts`, never on Pinata directly — swapping or adding a second pinning provider later touches only the `providers/` folder |
+| `services/ai/` as a single flat file (not the planned multi-subfolder abstraction) | With one AI provider (Gemini) and one concern (asset metadata generation), the planned `provider/`, `metadata/`, `tags/`, etc. subdirectories would all be near-empty. The interface boundary is still clean — all AI calls go through `gemini.provider.ts` — and can be refactored into the full subfolder structure if a second provider or concern is added. |
 | `controllers/` + `validators/` added between `routes/` and `services/` | Keeps `routes/` as pure route-to-handler wiring, `validators/` as pure input-shape enforcement (rejects bad requests before any business logic runs), and `controllers/` as the thin glue — each layer has exactly one job and is independently testable |
 | `hooks/` in frontend | Centralizes data-fetching and wallet-state logic so components stay presentational — see responsibilities below |
 
 ## Frontend Hooks Responsibilities
 
-| Hook | Responsibility |
-|---|---|
-| `useWallet` | Wraps Wagmi connection state, exposes connect/disconnect, current address, chain-mismatch warnings |
-| `useCreator` | Fetches/mutates the current or a specified creator profile via `api-client` |
-| `useAsset` | Handles the upload → hash → AI-suggest → pin → register flow state machine |
-| `useReview` | Submits and lists reviews for an asset |
-| `useAnalytics` | Fetches creator or admin analytics data for dashboard components |
+| Hook | Responsibility | Note |
+|---|---|---|
+| `useAuth` | Wallet auth state, session token, SIWE sign-in/sign-out flow | Originally planned as `useWallet` — renamed to better reflect that it manages auth session state, not just wallet connection (RainbowKit/wagmi handle the raw connect UX directly) |
+| `useCreatorProfile` | Fetches/mutates the current or a specified creator profile via `api-client` | Originally planned as `useCreator` — renamed for clarity |
+| `useAsset` | Handles the upload → hash → AI-suggest → pin → register flow state machine | — |
+| `useReview` | Submits and lists reviews for an asset | — |
+| `useAnalytics` | Fetches creator or admin analytics data for dashboard components | — |
 
-Components consume these hooks and stay focused on rendering — no direct `fetch`/`api-client` calls inside JSX-heavy component files.
+Organization, admin analytics, reputation, and certificate data are fetched directly in their respective page components via `api-client` — each is used in exactly one screen, making a dedicated hook an unnecessary abstraction at current scale.
 
 ## Backend Validators Responsibility
 

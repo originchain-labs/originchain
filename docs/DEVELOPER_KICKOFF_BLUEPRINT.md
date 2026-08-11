@@ -23,9 +23,9 @@ flowchart TD
     S --> E[Pinata]
     E -.future.-> E2[Other IPFS Providers]
     C --> F[AI Provider Layer]
-    F --> F1[OpenAI]
-    F -.future.-> F2[Claude / Gemini / Local]
-    B --> BS[Blockchain Service]
+    F --> F1[Gemini]
+    F -.future.-> F2[Claude / OpenAI / Local]
+    B --> BS[Blockchain Service - Read Only]
     C --> BS
     BS --> G[Arbitrum Stylus Contracts]
     G --> H[CreatorRegistry]
@@ -34,6 +34,11 @@ flowchart TD
     G --> K[ReputationManager]
 ```
 
+> [!NOTE]
+> **AI Provider:** The original plan targeted OpenAI as the AI provider. The actual implementation uses Google Gemini (`@google/genai`, `services/ai/gemini.provider.ts`). This was decided early in implementation and is reflected throughout the real codebase — `DEVELOPER_KICKOFF_BLUEPRINT.md` is the only doc that had not been updated to match.
+>
+> **Blockchain Service scope:** The original plan described the Blockchain Service as handling both reads and transaction execution. The actual implementation is **read-only** on the backend — all transaction signing and broadcasting is done from the frontend via wagmi. The backend Blockchain Service (`services/blockchain/`) handles `readContract`, `getBlockNumber`, `getTransactionReceipt`, `getTransaction`, and `getLogs` only. No `tx-executor` was built.
+
 ### Core Modules
 
 | Module | Responsibility |
@@ -41,10 +46,10 @@ flowchart TD
 | Frontend | Creator, visitor/collector, org, and admin-facing screens (16 total) |
 | Wallet Layer | Wallet connect, signing, chain management |
 | Backend API | Business logic, validation, auth, orchestration — never touches contracts or Pinata directly |
-| Blockchain Service | Sole owner of contract addresses, ABIs, tx execution, gas estimation, event decoding, retries, chain validation |
+| Blockchain Service | Sole owner of contract addresses, ABIs, read calls, event log queries, retries, and chain error translation. **Backend is read-only** — tx signing/broadcasting is done from the frontend via wagmi |
 | Storage Service | Sole owner of pinning/retrieval; currently backed by Pinata, abstracted so providers can be swapped |
 | Database | Search index, cached on-chain state, off-chain relational data |
-| AI Provider Layer | Pluggable metadata/tag/description/analytics generation; currently backed by OpenAI |
+| AI Provider Layer | Pluggable metadata/tag/description/analytics generation; currently backed by **Gemini** (`@google/genai`) |
 | Smart Contracts | Source of truth for identity, ownership, reviews, reputation |
 
 ### Why these two service layers matter
@@ -212,7 +217,7 @@ This costs one extra field per JSON document today and prevents a full data-migr
 - **Never commit secrets.** `.env` files are gitignored; `.env.example` files (committed) document required keys with placeholder values.
 - **Per-app env files.** `apps/frontend/.env.local`, `apps/backend/.env`, `contracts/.env` (deployer key, RPC URL) — kept separate so a leaked frontend env can't expose backend/deployer secrets.
 - **Shared constants** (contract addresses per network, chain IDs) live in `packages/shared-types/constants.ts`, generated/updated after each deployment — single source of truth for both frontend and backend.
-- **Secrets required:** OpenAI API key (AI Provider Layer), Pinata API key/secret (Storage Service), PostgreSQL connection string, Arbitrum RPC URL and deployer private key (Blockchain Service — test wallet only, never a real-funds wallet), JWT signing secret (session auth), Railway/Vercel deploy tokens (CI, later phase).
+- **Secrets required:** Gemini API key (AI Provider Layer — `@google/genai`), Pinata API key/secret (Storage Service), PostgreSQL connection string, Arbitrum RPC URL (Blockchain Service — read-only, no deployer key needed in backend at runtime), JWT signing secret (session auth), Railway/Vercel deploy tokens (CI, later phase).
 - **Secret handling practices:** load secrets via `process.env` only, never hard-code; validate presence of required env vars at process startup (fail fast, not on first request); never log secret values, even in error traces; rotate the JWT signing secret and any test-wallet key immediately if a laptop or repo is ever compromised.
 
 ---
