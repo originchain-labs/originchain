@@ -210,3 +210,11 @@ Base path: `/api/v1`. All authenticated routes require a session token issued vi
 - All requests are logged (method, path, status, latency) for debugging and demo-day troubleshooting; request bodies containing secrets or file contents are excluded from logs.
 - `POST /assets/prepare` enforces upload size limits and validates actual file MIME type (not just extension) before accepting a file for pinning.
 - `POST /auth/nonce` nonces expire after 5 minutes and are single-use — consumed and invalidated immediately upon successful `POST /auth/verify`, preventing replay.
+
+---
+
+## IPFS Pinning & Retention Policy
+
+- **Current Persistence State:** All pinned creative asset files and JSON metadata documents (`originchain.asset.v1`, `originchain.profile.v1`) remain pinned indefinitely on Pinata once pinned via `storageService.pinFile` or `storageService.pinJSON`. No unpinning, garbage collection, or automated expiration logic exists anywhere in the codebase.
+- **Accountable Account & Cost:** Storage costs and IPFS pin maintenance are attributed entirely to the project's single shared Pinata service account (configured via `PINATA_JWT`).
+- **Honest Current Policy & Production Recommendation:** Currently, there is **no retention or unpinning policy** implemented — all uploaded content persists indefinitely under the project's shared Pinata account. Before mainnet deployment, an explicit retention, storage quota, or unpinning policy for abandoned/unconfirmed draft assets must be implemented.
