@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import { validateEnv } from "./config/env-validator.js";
 import authRoutes from "./routes/auth.routes.js";
 import creatorRoutes from "./routes/creator.routes.js";
 import assetRoutes from "./routes/asset.routes.js";
@@ -11,7 +14,21 @@ import adminRoutes from "./routes/admin.routes.js";
 import { startCreatorIndexer } from "./indexer/creator-indexer.js";
 import { startAssetIndexer } from "./indexer/asset-indexer.js";
 
+validateEnv();
+
 const app = express();
+
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'none'"],
+                frameAncestors: ["'none'"],
+            },
+        },
+        crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+);
 
 app.use(
     cors({
@@ -19,6 +36,8 @@ app.use(
         credentials: true,
     })
 );
+
+app.use(morgan(":method :url :status :res[content-length] - :response-time ms"));
 app.use(express.json());
 app.use("/api/v1/auth", authRoutes);
 
