@@ -1,13 +1,13 @@
-import { createPublicClient, http, parseAbiItem } from "viem";
-import { arbitrumSepolia } from "viem/chains";
+import { parseAbiItem } from "viem";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client.js";
-import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { chainClient, CONTRACTS } from "../services/blockchain/registry.js";
+import { getLogs } from "../services/blockchain/events.js";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const CONTRACT_ADDRESS = CONTRACT_ADDRESSES.arbitrumSepolia.creatorRegistry as `0x${string}`;
+const CONTRACT_ADDRESS = CONTRACTS.creatorRegistry.address;
 const INDEXER_NAME = "creator-registry-indexer";
 const POLL_INTERVAL_MS = 10_000; // 10 seconds — fine for testnet/dev pace
 
@@ -21,11 +21,6 @@ const CONTRACT_DEPLOYMENT_BLOCK = 294428245n;
 const creatorRegisteredEvent = parseAbiItem(
     "event CreatorRegistered(address indexed creator, string profile_cid, uint64 timestamp)"
 );
-
-const client = createPublicClient({
-    chain: arbitrumSepolia,
-    transport: http(process.env.RPC_URL),
-});
 
 async function getLastIndexedBlock(): Promise<bigint> {
     const state = await prisma.indexerState.findUnique({ where: { indexerName: INDEXER_NAME } });
@@ -47,11 +42,11 @@ async function saveLastIndexedBlock(block: bigint) {
 
 export async function pollOnce() {
     const fromBlock = (await getLastIndexedBlock()) + 1n;
-    const toBlock = await client.getBlockNumber();
+    const toBlock = await chainClient.getBlockNumber();
 
     if (fromBlock > toBlock) return; // nothing new
 
-    const logs = await client.getLogs({
+    const logs = await getLogs({
         address: CONTRACT_ADDRESS,
         event: creatorRegisteredEvent,
         fromBlock,

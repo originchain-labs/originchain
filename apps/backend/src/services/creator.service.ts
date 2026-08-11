@@ -90,31 +90,34 @@ export async function updateCreatorProfile(
     });
 }
 
+import { readContract } from "./blockchain/read.js";
+import { CONTRACTS } from "./blockchain/registry.js";
+
 export async function getCreatorReputation(creatorId: string) {
     const creator = await prisma.creator.findUnique({ where: { id: creatorId } });
     if (!creator) throw new Error("CREATOR_NOT_FOUND");
 
     const walletAddress = creator.walletAddress as `0x${string}`;
 
-    const onChainScore = await chainClient.readContract({
-        address: REPUTATION_MANAGER,
-        abi: reputationManagerAbi,
+    const onChainScore = await readContract({
+        address: CONTRACTS.reputationManager.address,
+        abi: CONTRACTS.reputationManager.abi,
         functionName: "getScore",
         args: [walletAddress],
     });
 
-    const assetHashes = await chainClient.readContract({
-        address: CONTRACT_ADDRESSES.arbitrumSepolia.assetRegistry as `0x${string}`,
-        abi: assetRegistryAbi,
+    const assetHashes = await readContract({
+        address: CONTRACTS.assetRegistry.address,
+        abi: CONTRACTS.assetRegistry.abi,
         functionName: "getAssetsByCreator",
         args: [walletAddress],
     });
 
     let totalReviews = 0;
     for (const hash of assetHashes) {
-        const count = await chainClient.readContract({
-            address: CONTRACT_ADDRESSES.arbitrumSepolia.reviewRegistry as `0x${string}`,
-            abi: reviewRegistryAbi,
+        const count = await readContract({
+            address: CONTRACTS.reviewRegistry.address,
+            abi: CONTRACTS.reviewRegistry.abi,
             functionName: "getReviewCount",
             args: [hash],
         });
