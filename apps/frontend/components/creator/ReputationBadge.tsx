@@ -1,20 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getCreatorReputation } from "@/lib/api-client";
+import { useReputation } from "@/hooks/useReputation";
 
 export function ReputationBadge({ creatorId }: { creatorId: string }) {
-    const [reputation, setReputation] = useState<Awaited<ReturnType<typeof getCreatorReputation>> | null>(null);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        getCreatorReputation(creatorId)
-            .then(setReputation)
-            .catch(() => setError(true));
-    }, [creatorId]);
+    const { reputation, loading, error } = useReputation(creatorId);
 
     if (error) return null; // degrade silently — reputation is supplementary info, never block the page
-    if (!reputation) return <span className="text-xs text-zinc-400">Loading reputation…</span>;
+    if (loading || !reputation) return <span className="text-xs text-zinc-400">Loading reputation…</span>;
 
     return (
         <div className="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-600">

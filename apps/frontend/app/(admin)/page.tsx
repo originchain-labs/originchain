@@ -1,46 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getSession } from "@/lib/session";
-import { getAdminAnalytics } from "@/lib/api-client";
 import { RequireAuth } from "@/components/auth/RequireAuth";
-
-type AnalyticsData = {
-    totalCreators: number;
-    totalAssets: number;
-    totalReviews: number;
-};
+import { useAdmin } from "@/hooks/useAdmin";
 
 export default function AdminPage() {
-    const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-    const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const session = getSession();
-        if (!session) {
-            setError("Please sign in to view admin analytics");
-            setLoading(false);
-            return;
-        }
-
-        getAdminAnalytics(session.token)
-            .then((data) => {
-                if (data === null) {
-                    setIsAdmin(false);
-                } else {
-                    setIsAdmin(true);
-                    setAnalytics(data);
-                }
-            })
-            .catch((err) => {
-                setError(err instanceof Error ? err.message : "Failed to load admin analytics");
-            })
-            .finally(() => {
-                setLoading(false);
-            });
-    }, []);
+    const { analytics, isAdmin, loading, error } = useAdmin();
 
     if (loading) {
         return <div className="p-6 text-sm text-zinc-500">Loading admin analytics…</div>;

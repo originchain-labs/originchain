@@ -1,97 +1,49 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSession } from "@/lib/session";
-import { getMyOrganizations, createOrganization, updateOrganization } from "@/lib/api-client";
 import { RequireAuth } from "@/components/auth/RequireAuth";
-
-type Organization = {
-    id: string;
-    name: string;
-    ownerId: string;
-    walletAddress: string | null;
-    createdAt: string;
-};
+import { useOrganization } from "@/hooks/useOrganization";
 
 export default function OrgDashboardPage() {
-    const [organizations, setOrganizations] = useState<Organization[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [createName, setCreateName] = useState("");
-    const [isCreating, setIsCreating] = useState(false);
-    const [editName, setEditName] = useState("");
-    const [isUpdating, setIsUpdating] = useState(false);
-    const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+    const {
+        organizations,
+        loading,
+        error,
+        isCreating,
+        isUpdating,
+        updateMessage,
+        createOrg,
+        updateOrg,
+    } = useOrganization();
 
-    const loadOrgs = async () => {
-        const session = getSession();
-        if (!session) {
-            setError("Please sign in to view your organization dashboard");
-            setLoading(false);
-            return;
-        }
-        try {
-            setLoading(true);
-            setError(null);
-            const res = await getMyOrganizations(session.token);
-            setOrganizations(res.organizations);
-            if (res.organizations.length > 0) {
-                setEditName(res.organizations[0].name);
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to load organization");
-        } finally {
-            setLoading(false);
-        }
-    };
+    const [createName, setCreateName] = useState("");
+    const [editName, setEditName] = useState("");
+
+    const currentOrg = organizations.length > 0 ? organizations[0] : null;
 
     useEffect(() => {
-        loadOrgs();
-    }, []);
+        if (currentOrg) {
+            setEditName(currentOrg.name);
+        }
+    }, [currentOrg]);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
-        const session = getSession();
-        if (!session || !createName.trim()) return;
-
-        try {
-            setIsCreating(true);
-            setError(null);
-            await createOrganization(createName.trim(), session.token);
+        const success = await createOrg(createName);
+        if (success) {
             setCreateName("");
-            await loadOrgs();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to create organization");
-        } finally {
-            setIsCreating(false);
         }
     };
 
     const handleUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
-        const session = getSession();
-        if (!session || organizations.length === 0 || !editName.trim()) return;
-
-        const org = organizations[0];
-        try {
-            setIsUpdating(true);
-            setUpdateMessage(null);
-            setError(null);
-            await updateOrganization(org.id, editName.trim(), session.token);
-            setUpdateMessage("Organization name updated successfully!");
-            await loadOrgs();
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Failed to update organization");
-        } finally {
-            setIsUpdating(false);
-        }
+        if (!currentOrg) return;
+        await updateOrg(currentOrg.id, editName);
     };
 
     if (loading) {
         return <div className="p-6 text-sm text-zinc-500">Loading organization dashboard…</div>;
     }
-
-    const currentOrg = organizations.length > 0 ? organizations[0] : null;
 
     return (
         <RequireAuth>

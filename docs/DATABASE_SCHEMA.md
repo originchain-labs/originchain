@@ -17,8 +17,8 @@ erDiagram
     CREATORS ||--o{ ASSETS : owns
     CREATORS ||--o{ REVIEWS : writes
     ASSETS ||--o{ REVIEWS : receives
-    ORGANIZATIONS ||--o{ CREATORS : employs
-    CREATORS }o--|| ORGANIZATIONS : owned_by
+    ORGANIZATIONS ||--o{ CREATORS : "has members"
+    CREATORS ||--|| ORGANIZATIONS : owns
 
     CREATORS {
         uuid id PK
