@@ -5,6 +5,7 @@ import { arbitrumSepolia } from "viem/chains";
 import { createHash } from "crypto";
 import { storageService } from "./storage/index.js";
 import { suggestMetadata } from "./ai/gemini.provider.js";
+import { detectAndValidateFileType, sanitizeFileName, validateImageBuffer } from "../utils/upload-validator.js";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
@@ -20,10 +21,14 @@ export async function prepareAsset(
     title?: string,
     description?: string
 ) {
-    // Server-side hash re-verification — never trust a client-submitted hash.
-    const contentHash = "0x" + createHash("sha256").update(fileBuffer).digest("hex");
+    const cleanFileName = sanitizeFileName(fileName);
+    const detected = await detectAndValidateFileType(fileBuffer);
+    const validatedBuffer = await validateImageBuffer(fileBuffer, detected.mime);
 
-    const file = new File([new Uint8Array(fileBuffer)], fileName, { type: mimeType });
+    // Server-side hash re-verification on EXACT original bytes — never trust client hash
+    const contentHash = "0x" + createHash("sha256").update(validatedBuffer).digest("hex");
+
+    const file = new File([new Uint8Array(validatedBuffer)], cleanFileName, { type: detected.mime });
     const { cid: ipfsCid } = await storageService.pinFile(file);
 
     const suggestedMetadata = await suggestMetadata(title, description);

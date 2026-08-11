@@ -24,6 +24,10 @@ export async function prepare(req: AuthedRequest, res: Response) {
         const result = await prepareAsset(req.file.buffer, req.file.originalname, req.file.mimetype, title, description);
         res.json(result);
     } catch (err) {
+        const message = err instanceof Error ? err.message : "UNKNOWN_ERROR";
+        if (message === "INVALID_FILE_TYPE") {
+            return res.status(400).json({ error: { code: "VALIDATION_ERROR", message: "File type not allowed or corrupted" } });
+        }
         console.error("[asset] prepare failed:", err);
         res.status(502).json({ error: { code: "IPFS_PIN_FAILED", message: "Failed to prepare asset" } });
     }
