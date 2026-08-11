@@ -247,25 +247,25 @@ Fourteen phases, ordered by dependency, reflecting the revised implementation or
 
 ```mermaid
 flowchart TD
-    P0[Phase 0: Foundation done] --> P1[Phase 1: Frontend+Backend Skeleton done]
-    P1 --> P2[Phase 2: Wallet Auth done]
-    P2 --> P3[Phase 3: Creator Profile done]
-    P3 --> P4[Phase 4: IPFS Integration done]
-    P3 --> P5[Phase 5: Asset Registration done]
+    P0["Phase 0: Foundation (done)"] --> P1["Phase 1: Frontend+Backend Skeleton (done)"]
+    P1 --> P2["Phase 2: Wallet Auth (done)"]
+    P2 --> P3["Phase 3: Creator Profile (done)"]
+    P3 --> P4["Phase 4: IPFS Integration (done)"]
+    P3 --> P5["Phase 5: Asset Registration (done)"]
     P4 --> P5
-    P5 --> P6[Phase 6: Verification done]
-    P5 --> P7[Phase 7: Reviews done]
+    P5 --> P6["Phase 6: Verification (done)"]
+    P5 --> P7["Phase 7: Reviews (done)"]
     P3 --> P7
-    P7 --> P8[Phase 8: Reputation done]
-    P5 --> P9[Phase 9: AI Features done]
+    P7 --> P8["Phase 8: Reputation (done)"]
+    P5 --> P9["Phase 9: AI Features (done)"]
     P8 --> P9
-    P3 --> P10[Phase 10: Org and Admin Screens next]
+    P3 --> P10["Phase 10: Org and Admin Screens (done)"]
     P9 --> P10
-    P6 --> P11[Phase 11: Security and Hardening]
+    P6 --> P11["Phase 11: Security & Hardening (done)"]
     P7 --> P11
     P8 --> P11
     P9 --> P11
     P10 --> P11
-    P11 --> P12[Phase 12: Design and Polish]
-    P12 --> P13[Phase 13: Deployment]
+    P11 --> P12["Phase 12: Design and Polish"]
+    P12 --> P13["Phase 13: Deployment"]
 ```

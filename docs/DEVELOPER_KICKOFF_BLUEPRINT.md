@@ -16,22 +16,22 @@ OriginChain is a decentralized creator identity and proof-of-origin platform bui
 
 ```mermaid
 flowchart TD
-    A[Frontend - Next.js/React] --> B[Wallet Layer - RainbowKit/Wagmi/Viem]
-    A --> C[Backend API - Node.js/Express]
-    C --> D[(PostgreSQL - Prisma)]
-    C --> S[Storage Service]
-    S --> E[Pinata]
-    E -.future.-> E2[Other IPFS Providers]
-    C --> F[AI Provider Layer]
-    F --> F1[Gemini]
-    F -.future.-> F2[Claude / OpenAI / Local]
-    B --> BS[Blockchain Service - Read Only]
+    A["Frontend - Next.js/React"] --> B["Wallet Layer - RainbowKit/Wagmi/Viem"]
+    A --> C["Backend API - Node.js/Express"]
+    C --> D[("PostgreSQL - Prisma")]
+    C --> S["Storage Service"]
+    S --> E["Pinata"]
+    E -.future.-> E2["Other IPFS Providers"]
+    C --> F["AI Provider Layer"]
+    F --> F1["Gemini"]
+    F -.future.-> F2["Claude / OpenAI / Local"]
+    B --> BS["Blockchain Service - Read Only"]
     C --> BS
-    BS --> G[Arbitrum Stylus Contracts]
-    G --> H[CreatorRegistry]
-    G --> I[AssetRegistry]
-    G --> J[ReviewRegistry]
-    G --> K[ReputationManager]
+    BS --> G["Arbitrum Stylus Contracts"]
+    G --> H["CreatorRegistry"]
+    G --> I["AssetRegistry"]
+    G --> J["ReviewRegistry"]
+    G --> K["ReputationManager"]
 ```
 
 > [!NOTE]
@@ -99,13 +99,12 @@ originchain/
 ```mermaid
 sequenceDiagram
     participant U as Creator (Frontend)
-    participant W as Wallet
-    participant B as Backend
+    participant W as Wallet (Wagmi)
+    participant B as Backend API
     participant DB as PostgreSQL
-    participant S as Storage Service
-    participant BS as Blockchain Service
-    participant C as Smart Contracts
-    participant AI as AI Provider Layer
+    participant S as Storage Service (Pinata)
+    participant C as Smart Contracts (Stylus)
+    participant AI as AI Provider (Gemini)
 
     U->>W: Connect wallet
     W-->>U: Signed session
@@ -113,15 +112,15 @@ sequenceDiagram
     B->>AI: Generate tags/description
     AI-->>B: Enriched metadata
     B->>S: pin(asset), pinJSON(metadata)
-    S-->>B: CID
-    B->>U: Return CID + hash for confirmation
-    U->>W: Sign registration transaction
-    W->>BS: registerAsset(hash, cid, ...)
-    BS->>C: Execute tx, estimate gas, retry on failure
-    C-->>BS: Emit event
-    BS-->>B: Decoded event (indexer listens)
+    S-->>B: Asset & Metadata CIDs
+    B-->>U: Return CIDs + content hash for review
+    U->>W: Sign & broadcast registration transaction
+    W->>C: register_asset(hash, ipfsCid, metadataCid, registry)
+    C-->>W: Transaction confirmed on-chain
+    W->>B: POST /assets/confirm (txHash, CIDs)
+    C-->>B: Event emitted & indexed by backend worker
     B->>DB: Persist indexed record
-    B-->>U: Confirmation + proof view
+    B-->>U: Confirmation + Proof Certificate view
 ```
 
 ### Layer Interactions

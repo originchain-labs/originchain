@@ -41,7 +41,7 @@ On-chain anchor for creator identity — links a wallet address to a registered 
 sequenceDiagram
     participant C as Creator Wallet
     participant CR as CreatorRegistry
-    C->>CR: registerCreator(profileCid)
+    C->>CR: register_creator(profileCid)
     CR-->>C: CreatorRegistered event
     Note over CR: Indexer picks up event, writes to Postgres
 ```
@@ -82,8 +82,8 @@ sequenceDiagram
     participant C as Creator Wallet
     participant AR as AssetRegistry
     participant CR as CreatorRegistry
-    C->>AR: registerAsset(hash, cid, metadataCid)
-    AR->>CR: isRegistered(caller)?
+    C->>AR: register_asset(hash, ipfsCid, metadataCid, creatorRegistry)
+    AR->>CR: is_registered(caller)
     CR-->>AR: true
     AR-->>C: AssetRegistered event
 ```
@@ -122,10 +122,13 @@ Sybil-resistant review storage — one review per registered creator per asset, 
 sequenceDiagram
     participant R as Reviewer Wallet
     participant RR as ReviewRegistry
+    participant CR as CreatorRegistry
     participant AR as AssetRegistry
-    R->>RR: submitReview(assetHash, rating, commentCid)
-    RR->>AR: getAsset(assetHash).creator
-    AR-->>RR: creatorAddress
+    R->>RR: submit_review(assetHash, rating, commentCid, creatorRegistry, assetRegistry)
+    RR->>CR: is_registered(reviewer)
+    CR-->>RR: true
+    RR->>AR: get_asset(assetHash)
+    AR-->>RR: AssetRecord
     RR-->>R: ReviewSubmitted event
 ```
 
@@ -161,9 +164,9 @@ sequenceDiagram
     participant RM as ReputationManager
     participant AR as AssetRegistry
     participant RR as ReviewRegistry
-    I->>RM: recomputeScore(creatorAddress)
-    RM->>AR: getAssetsByCreator(creatorAddress)
-    RM->>RR: getReviewCount / aggregate ratings
+    I->>RM: recompute_score(creatorAddress, assetRegistry, reviewRegistry)
+    RM->>AR: get_assets_by_creator(creatorAddress)
+    RM->>RR: get_review_count / aggregate ratings
     RM-->>I: ScoreUpdated event
 ```
 
@@ -173,11 +176,11 @@ sequenceDiagram
 
 ```mermaid
 flowchart LR
-    CreatorRegistry -->|isRegistered check| AssetRegistry
-    CreatorRegistry -->|isRegistered check| ReviewRegistry
-    AssetRegistry -->|asset ownership check| ReviewRegistry
-    AssetRegistry -->|asset count input| ReputationManager
-    ReviewRegistry -->|review data input| ReputationManager
+    CreatorRegistry -->|"is_registered check"| AssetRegistry
+    CreatorRegistry -->|"is_registered check"| ReviewRegistry
+    AssetRegistry -->|"asset ownership check"| ReviewRegistry
+    AssetRegistry -->|"asset count input"| ReputationManager
+    ReviewRegistry -->|"review data input"| ReputationManager
 ```
 
 **Deployment order (dependency-driven):** `CreatorRegistry` → `AssetRegistry` → `ReviewRegistry` → `ReputationManager`. Each later contract stores the address of the ones before it and calls them at execution time — deploy addresses must be recorded and wired in immediately after each deployment.

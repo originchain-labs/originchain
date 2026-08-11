@@ -80,6 +80,7 @@ model Asset {
   @@index([creatorId])
 
   reviews Review[]
+  tags    AssetTag[]
 }
 
 
@@ -97,4 +98,25 @@ model Review {
   @@map("reviews")
   @@unique([assetId, reviewerId])
   @@index([assetId])
+}
+
+
+model Tag {
+  id     String     @id @default(uuid())
+  name   String     @unique @db.VarChar(50)
+
+  assets AssetTag[]
+
+  @@map("tags")
+}
+
+
+model AssetTag {
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id])
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([assetId, tagId])
+  @@map("asset_tags")
 }

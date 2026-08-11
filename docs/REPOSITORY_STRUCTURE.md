@@ -161,6 +161,12 @@ originchain/
 │   ├── shared-types/                 # Single source of truth for cross-app types
 │   │   ├── src/
 │   │   │   ├── api/                  # Request/response types matching API_SPECIFICATION.md
+│   │   │   │                         # ⚠ Currently an empty placeholder — no files present.
+│   │   │   │                         #   lib/api-client.ts defines its own inline TypeScript
+│   │   │   │                         #   types per-function rather than importing from here.
+│   │   │   │                         #   A dedicated shared api/ types module was planned but
+│   │   │   │                         #   deferred; the inline approach was used instead to
+│   │   │   │                         #   avoid import-cycle risk before the types stabilized.
 │   │   │   ├── contracts/             # ABI-derived TS types
 │   │   │   ├── constants.ts           # Deployed contract addresses per network
 │   │   │   └── index.ts
