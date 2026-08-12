@@ -1,0 +1,49 @@
+{
+  "name": "backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "OriginChain backend API",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@google/genai": "^2.16.0",
+    "@originchain/shared-types": "workspace:*",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.2.0",
+    "pdf-lib": "^1.17.1",
+    "pinata": "^2.5.6",
+    "qrcode": "^1.5.4",
+    "siwe": "^3.0.0",
+    "viem": "2.x",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.2.0",
+    "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
+    "@types/sanitize-html": "^2.16.1",
+    "prisma": "^7.9.1",
+    "tsx": "^4.23.4",
+    "typescript": "^5"
+  }
+}
