@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # OriginChain
 
 **Own Your Creativity. Prove Your Origin.**
@@ -273,3 +274,7 @@ Contributions follow a feature-branch workflow off `dev`, conventional commit pr
 ## License
 
 Licensed under the **Apache License 2.0** (see [`LICENSE`](LICENSE)).
+=======
+# originchain
+Decentralized creator identity &amp; proof-of-origin platform on Arbitrum
+>>>>>>> 4b2f81068b9dc7e9c6b2b2c14014c4843ba65c76

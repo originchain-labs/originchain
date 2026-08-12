@@ -141,6 +141,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+<<<<<<< HEAD
 
 # Rust / Stylus (contracts/)
 target/
@@ -175,3 +176,5 @@ CLAUDE.md
 
 # Prisma generated client
 **/generated/prisma/
+=======
+>>>>>>> 4b2f81068b9dc7e9c6b2b2c14014c4843ba65c76
