@@ -17,13 +17,13 @@ export function DiscoverCreatorsGrid() {
     useEffect(() => {
         const q = searchQuery.trim();
         if (q.length < 2) {
-            setResults([]);
-            setSearched(false);
+            // Render guards on searchQuery length directly, so stale results/searched
+            // values are never shown for a short query - no state reset needed here.
             return;
         }
         let isCurrent = true;
-        setLoading(true);
         const timer = setTimeout(() => {
+            setLoading(true);
             search(q)
                 .then((data) => {
                     if (isCurrent) {
