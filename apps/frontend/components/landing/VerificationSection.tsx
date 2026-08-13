@@ -41,7 +41,7 @@ export function VerificationSection() {
                         transition={{ delay: 0.1 }}
                         className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight"
                     >
-                        Don't Just Trust It. <span className="text-gradient-cyan">Verify It.</span>
+                        Don&apos;t Just Trust It. <span className="text-gradient-cyan">Verify It.</span>
                     </motion.h2>
 
                     <motion.p

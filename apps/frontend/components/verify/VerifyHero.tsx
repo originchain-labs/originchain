@@ -28,7 +28,7 @@ export function VerifyHero() {
                     transition={{ duration: 0.7, delay: 0.1 }}
                     className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.15] max-w-4xl mx-auto"
                 >
-                    Don't Just Trust It. <br className="hidden sm:inline" />
+                    Don&apos;t Just Trust It. <br className="hidden sm:inline" />
                     <span className="text-gradient-cyan">Verify the Origin.</span>
                 </motion.h1>
 

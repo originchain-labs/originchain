@@ -36,7 +36,7 @@ export function ExploreCtaSection() {
                         transition={{ delay: 0.2 }}
                         className="text-base sm:text-xl text-zinc-300 max-w-2xl mx-auto leading-relaxed"
                     >
-                        Create, prove, and verify digital origin through OriginChain's decentralized infrastructure.
+                        Create, prove, and verify digital origin through OriginChain&apos;s decentralized infrastructure.
                     </motion.p>
                 </div>
 

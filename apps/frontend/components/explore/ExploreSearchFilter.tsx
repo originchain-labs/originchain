@@ -117,7 +117,7 @@ export function ExploreSearchFilter() {
 
                             {filteredResults.length === 0 && (
                                 <div className="p-4 text-center text-xs text-zinc-500 font-mono">
-                                    No records matching "{query}". Try a different SHA-256 hash or creator handle.
+                                    No records matching &quot;{query}&quot;. Try a different SHA-256 hash or creator handle.
                                 </div>
                             )}
                         </motion.div>

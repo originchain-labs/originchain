@@ -26,7 +26,7 @@ export function RealWorldStoryExample() {
                         See It in <span className="text-gradient-cyan">Action.</span>
                     </h2>
                     <p className="text-base text-zinc-300">
-                        Follow Elena's journey from creating digital artwork to global verification trust.
+                        Follow Elena&apos;s journey from creating digital artwork to global verification trust.
                     </p>
                 </div>
 

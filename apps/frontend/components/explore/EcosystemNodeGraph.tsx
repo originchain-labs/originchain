@@ -12,14 +12,15 @@ import {
     KeyRound,
     Cpu,
     ArrowUpRight,
-    Sparkles
+    Sparkles,
+    type LucideIcon
 } from "lucide-react";
 
 type NodeConcept = {
     id: string;
     label: string;
     tagline: string;
-    icon: any;
+    icon: LucideIcon;
     desc: string;
     connections: string[];
     details: string[];

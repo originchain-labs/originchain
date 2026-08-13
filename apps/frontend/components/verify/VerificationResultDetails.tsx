@@ -80,7 +80,7 @@ export function VerificationResultDetails({ result, queryStr, onReset }: Props) 
                     </span>
                     <h2 className="text-3xl font-extrabold text-white">No Matching Proof Record Found</h2>
                     <p className="text-sm text-zinc-400 max-w-lg mx-auto font-mono">
-                        We couldn't locate an authentic on-chain proof matching query "{queryStr}". The asset may not be registered yet.
+                        We couldn&apos;t locate an authentic on-chain proof matching query &quot;{queryStr}&quot;. The asset may not be registered yet.
                     </p>
                 </div>
 

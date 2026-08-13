@@ -19,7 +19,7 @@ export function Step06Immutability() {
                         </h2>
 
                         <p className="text-base text-zinc-300 leading-relaxed">
-                            Each block is cryptographically linked to the previous block's parent hash. Any attempt to modify a historical record breaks the cryptographic chain, making silent tampering impossible.
+                            Each block is cryptographically linked to the previous block&apos;s parent hash. Any attempt to modify a historical record breaks the cryptographic chain, making silent tampering impossible.
                         </p>
                     </div>
 
