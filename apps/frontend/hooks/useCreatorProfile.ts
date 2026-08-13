@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useAccount, useWriteContract } from "wagmi";
-import { creatorRegistryAbi } from "@originchain/shared-types/contracts/creatorRegistry";
-import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { creatorRegistryAbi } from "@/lib/shared-types/contracts/creatorRegistry";
+import { CONTRACT_ADDRESSES } from "@/lib/shared-types/constants";
 import { getSession } from "@/lib/session";
 
 const CONTRACT_ADDRESS = CONTRACT_ADDRESSES.arbitrumSepolia.creatorRegistry as `0x${string}`;

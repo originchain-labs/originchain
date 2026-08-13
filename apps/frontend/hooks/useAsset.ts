@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react";
 import { useAccount, useWriteContract } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
-import { assetRegistryAbi } from "@originchain/shared-types/contracts/assetRegistry";
-import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { assetRegistryAbi } from "@/lib/shared-types/contracts/assetRegistry";
+import { CONTRACT_ADDRESSES } from "@/lib/shared-types/constants";
 import { hashFile } from "@/lib/hash";
 import { prepareAsset, finalizeAssetMetadata, confirmAssetRegistration, devRegisterAsset } from "@/lib/api-client";
 import { getSession } from "@/lib/session";

@@ -3,8 +3,8 @@
 import { useState, useCallback } from "react";
 import { useWriteContract, useAccount } from "wagmi";
 import { waitForTransactionReceipt } from "wagmi/actions";
-import { reviewRegistryAbi } from "@originchain/shared-types/contracts/reviewRegistry";
-import { CONTRACT_ADDRESSES } from "@originchain/shared-types/constants";
+import { reviewRegistryAbi } from "@/lib/shared-types/contracts/reviewRegistry";
+import { CONTRACT_ADDRESSES } from "@/lib/shared-types/constants";
 import { wagmiConfig } from "@/lib/wagmi-config";
 import { submitReviewToBackend } from "@/lib/api-client";
 import { getSession } from "@/lib/session";
