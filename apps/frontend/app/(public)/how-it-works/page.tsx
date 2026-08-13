@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Blockchain3DCameraCanvas } from "@/components/landing/Blockchain3DCameraCanvas";
 import { HowItWorksHero } from "@/components/how-it-works/HowItWorksHero";
 import { BigPictureOverview } from "@/components/how-it-works/BigPictureOverview";
 import { StickyStepNav } from "@/components/how-it-works/StickyStepNav";
@@ -19,37 +17,10 @@ import { CreatorToVerifierSplit } from "@/components/how-it-works/CreatorToVerif
 import { HowItWorksCtaSection } from "@/components/how-it-works/HowItWorksCtaSection";
 
 export default function HowItWorksPage() {
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-    const [reducedMotion, setReducedMotion] = useState(false);
-
-    useEffect(() => {
-        const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-        setReducedMotion(mediaQuery.matches);
-
-        const handleMediaChange = (e: MediaQueryListEvent) => {
-            setReducedMotion(e.matches);
-        };
-        mediaQuery.addEventListener("change", handleMediaChange);
-
-        const handleMouseMove = (e: MouseEvent) => {
-            if (mediaQuery.matches) return;
-            const x = (e.clientX / window.innerWidth) * 2 - 1;
-            const y = (e.clientY / window.innerHeight) * 2 - 1;
-            setMousePos({ x, y });
-        };
-
-        window.addEventListener("mousemove", handleMouseMove);
-
-        return () => {
-            mediaQuery.removeEventListener("change", handleMediaChange);
-            window.removeEventListener("mousemove", handleMouseMove);
-        };
-    }, []);
-
     return (
         <div className="relative min-h-screen bg-[#030712] text-zinc-100 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
-            {/* Ambient Background Canvas */}
-            <Blockchain3DCameraCanvas mousePos={mousePos} reducedMotion={reducedMotion} />
+            {/* Ambient Background Grid & Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
             <div className="relative z-10 space-y-0">
                 {/* 01 — HERO */}
