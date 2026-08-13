@@ -41,7 +41,7 @@ export default function CreatorsIndexPage() {
                 <CreatorTimeline />
 
                 {/* 07 — TRUST INDICATORS */}
-                <CreatorTrustSection />
+                <CreatorTrustSection assetCount={0} reviewCount={0} />
 
                 {/* 08 — DISCOVER OTHER CREATORS */}
                 <DiscoverCreatorsGrid />
