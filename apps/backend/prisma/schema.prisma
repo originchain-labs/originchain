@@ -1,0 +1,122 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Creator {
+  id              String   @id @default(uuid())
+  walletAddress   String   @unique @db.VarChar(42)
+  displayName     String   @db.VarChar(100)
+  bio             String?
+  avatarCid       String?  @db.VarChar(100)
+  organizationId  String?
+  organization    Organization? @relation("OrganizationMembers", fields: [organizationId], references: [id])
+  ownedOrganization Organization? @relation("OrganizationOwner")
+  onChainConfirmed Boolean @default(false)
+  registrationTxHash String? @db.VarChar(66)
+  createdAt       DateTime @default(now())
+  reputationScore   Int      @default(0)
+  reputationUpdatedAt DateTime?
+
+  @@map("creators")
+  @@index([walletAddress])
+
+  assets Asset[]
+  reviewsGiven Review[]
+}
+
+
+model Organization {
+  id            String   @id @default(uuid())
+  name          String   @db.VarChar(150)
+  ownerId       String   @unique
+  owner         Creator  @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  walletAddress String?  @unique @db.VarChar(42)
+  createdAt     DateTime @default(now())
+
+  members       Creator[] @relation("OrganizationMembers")
+
+  @@map("organizations")
+}
+
+
+model IndexerState {
+  id            String   @id @default(uuid())
+  indexerName   String   @unique @db.VarChar(100)
+  lastBlock     BigInt
+  updatedAt     DateTime @updatedAt
+
+  @@map("indexer_state")
+}
+
+
+model Asset {
+  id                String   @id @default(uuid())
+  creatorId         String
+  creator           Creator  @relation(fields: [creatorId], references: [id])
+  contentHash       String   @unique @db.VarChar(66)
+  ipfsCid           String   @db.VarChar(100)
+  metadataCid       String   @db.VarChar(100)
+  title             String   @db.VarChar(200)
+  description       String?
+  aiGeneratedFlag   Boolean  @default(false)
+  registeredAt      DateTime?
+  txHash            String?  @db.VarChar(66)
+  onChainConfirmed  Boolean  @default(false)
+  certificateCid    String?  @db.VarChar(100)
+  proofId           String?  @unique @db.VarChar(20)
+
+  @@map("assets")
+  @@index([creatorId])
+
+  reviews Review[]
+  tags    AssetTag[]
+}
+
+
+model Review {
+  id             String   @id @default(uuid())
+  assetId        String
+  asset          Asset    @relation(fields: [assetId], references: [id])
+  reviewerId     String
+  reviewer       Creator  @relation(fields: [reviewerId], references: [id])
+  rating         Int
+  comment        String?
+  txHash         String   @db.VarChar(66)
+  createdAt      DateTime @default(now())
+
+  @@map("reviews")
+  @@unique([assetId, reviewerId])
+  @@index([assetId])
+}
+
+
+model Tag {
+  id     String     @id @default(uuid())
+  name   String     @unique @db.VarChar(50)
+
+  assets AssetTag[]
+
+  @@map("tags")
+}
+
+
+model AssetTag {
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id])
+  tagId   String
+  tag     Tag    @relation(fields: [tagId], references: [id])
+
+  @@id([assetId, tagId])
+  @@map("asset_tags")
+}
