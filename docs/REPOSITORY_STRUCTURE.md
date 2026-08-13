@@ -22,7 +22,8 @@ originchain/
 │   │   │   │   ├── profile/         # Profile management: create/, edit/ sub-routes
 │   │   │   │   └── assets/          # Asset management: upload/ sub-route
 │   │   │   ├── (org)/               # Organization-role route group
-│   │   │   │   └── dashboard/       # Organization dashboard page (/org/dashboard -> /dashboard)
+│   │   │   │   └── org/
+│   │   │   │       └── dashboard/   # Organization dashboard page (/org/dashboard)
 │   │   │   └── (admin)/             # Admin route group
 │   │   │       └── page.tsx         # Admin analytics page
 │   │   │
