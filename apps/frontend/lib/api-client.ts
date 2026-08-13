@@ -383,17 +383,22 @@ export async function createOrganization(data: string | { name: string }, token:
     }
 }
 
-export async function updateOrganization(orgId: string, data: { name?: string }, token: string) {
+export async function updateOrganization(
+    orgId: string,
+    data: string | { name?: string },
+    token: string
+) {
+    const nameStr = typeof data === "string" ? data : data.name;
     try {
         const res = await fetch(`${API_URL}/api/v1/organizations/${orgId}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ name: nameStr }),
         });
         if (!res.ok) throw new Error("Failed to update organization");
         return await res.json();
     } catch {
-        return { id: orgId, ...data };
+        return { id: orgId, name: nameStr };
     }
 }
 
