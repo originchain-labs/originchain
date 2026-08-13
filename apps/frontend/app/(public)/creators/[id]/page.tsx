@@ -57,8 +57,8 @@ export default async function CreatorProfilePage({
                     reputationScore={reputation?.score ?? 0}
                 />
 
-                {/* 04 — FEATURED CREATION */}
-                <FeaturedCreationCard />
+                {/* 04 — FEATURED CREATION (most recently registered asset, or hidden if none) */}
+                <FeaturedCreationCard asset={assets[0] ?? null} />
 
                 {/* 05 — REGISTERED CREATIONS */}
                 <CreationsGrid assets={assets} />

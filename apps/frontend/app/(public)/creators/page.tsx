@@ -31,8 +31,8 @@ export default function CreatorsIndexPage() {
                 {/* 03 — STATS BAR */}
                 <CreatorStatsBar registeredCount={42} verifiedCount={42} reputationScore={99} />
 
-                {/* 04 — FEATURED CREATION */}
-                <FeaturedCreationCard />
+                {/* 04 — FEATURED CREATION (this whole page has no real data source yet - hidden) */}
+                <FeaturedCreationCard asset={null} />
 
                 {/* 05 — REGISTERED CREATIONS */}
                 <CreationsGrid assets={[]} />
