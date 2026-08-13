@@ -59,7 +59,9 @@ export default function SearchPage() {
                             ))}
                         </div>
                     )}
-                    {results.total === 0 && <p className="text-sm text-zinc-500">No results found.</p>}
+                    {results.assets.length === 0 && results.creators.length === 0 && (
+                        <p className="text-sm text-zinc-500">No results found.</p>
+                    )}
                 </div>
             )}
         </div>
