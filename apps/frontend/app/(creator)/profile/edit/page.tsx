@@ -40,7 +40,7 @@ export default function EditProfilePage() {
 
     if (!isMounted || isLoading) {
         return (
-            <div className="mx-auto max-w-md p-6 text-sm text-zinc-500">
+            <div className="mx-auto max-w-md px-6 pb-6 pt-24 text-sm text-zinc-500">
                 Loading profile...
             </div>
         );
@@ -71,7 +71,7 @@ export default function EditProfilePage() {
 
     return (
         <RequireAuth>
-            <div className="mx-auto max-w-md p-6">
+            <div className="mx-auto max-w-md px-6 pb-6 pt-24">
                 <h1 className="mb-4 text-xl font-semibold text-zinc-900">Edit Profile</h1>
 
                 <form onSubmit={handleSave} className="space-y-4">

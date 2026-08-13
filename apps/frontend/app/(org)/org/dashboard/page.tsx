@@ -42,12 +42,12 @@ export default function OrgDashboardPage() {
     };
 
     if (loading) {
-        return <div className="p-6 text-sm text-zinc-500">Loading organization dashboard…</div>;
+        return <div className="px-6 pb-6 pt-24 text-sm text-zinc-500">Loading organization dashboard…</div>;
     }
 
     return (
         <RequireAuth>
-            <div className="mx-auto max-w-2xl p-6">
+            <div className="mx-auto max-w-2xl px-6 pb-6 pt-24">
                 <h1 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                     Organization Dashboard
                 </h1>
