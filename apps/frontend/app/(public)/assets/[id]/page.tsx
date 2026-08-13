@@ -17,7 +17,7 @@ export default async function AssetDetailPage({
     const certificate = asset.proofId ? await getCertificate(id) : null;
 
     return (
-        <div className="mx-auto max-w-xl p-6">
+        <div className="mx-auto max-w-xl px-6 pb-6 pt-24">
             <h1 className="mb-2 text-xl font-semibold">{asset.title}</h1>
             <p className="mb-4 text-sm text-zinc-500">by {asset.creator.displayName}</p>
             <ReputationBadge creatorId={asset.creator.id} />

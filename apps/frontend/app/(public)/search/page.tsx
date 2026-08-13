@@ -20,7 +20,7 @@ export default function SearchPage() {
     }
 
     return (
-        <div className="mx-auto max-w-2xl p-6">
+        <div className="mx-auto max-w-2xl px-6 pb-6 pt-24">
             <h1 className="mb-4 text-xl font-semibold">Search</h1>
             <div className="mb-6 flex gap-2">
                 <input

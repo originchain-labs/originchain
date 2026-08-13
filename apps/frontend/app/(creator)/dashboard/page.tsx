@@ -10,11 +10,11 @@ import { ChartTooltip } from "@/components/charts/tooltip";
 export default function DashboardPage() {
     const { insights, error, loading } = useAnalytics();
 
-    if (error) return <p className="p-6 text-sm text-red-600">{error}</p>;
-    if (loading || !insights) return <p className="p-6 text-sm text-zinc-500">Loading dashboard…</p>;
+    if (error) return <p className="px-6 pb-6 pt-24 text-sm text-red-600">{error}</p>;
+    if (loading || !insights) return <p className="px-6 pb-6 pt-24 text-sm text-zinc-500">Loading dashboard…</p>;
 
     return (
-        <div className="mx-auto max-w-3xl p-6">
+        <div className="mx-auto max-w-3xl px-6 pb-6 pt-24">
             <h1 className="mb-4 text-xl font-semibold">Your Dashboard</h1>
 
             {insights.aiSummary && (

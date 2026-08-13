@@ -1,65 +1,87 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import { Blockchain3DCameraCanvas } from "@/components/landing/Blockchain3DCameraCanvas";
+import { ScrollIndicator } from "@/components/landing/ScrollIndicator";
+import { HeroSection } from "@/components/landing/HeroSection";
+import { WhatIsSection } from "@/components/landing/WhatIsSection";
+import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
+import { ProofOfOriginSection } from "@/components/landing/ProofOfOriginSection";
+
+import { ExploreAssetsSection } from "@/components/landing/ExploreAssetsSection";
+import { ReputationSection } from "@/components/landing/ReputationSection";
+import { VerificationSection } from "@/components/landing/VerificationSection";
+import { WhyOriginChainSection } from "@/components/landing/WhyOriginChainSection";
+import { FinalCtaSection } from "@/components/landing/FinalCtaSection";
 
 export default function Home() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Check reduced motion preference
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    queueMicrotask(() => setReducedMotion(mediaQuery.matches));
+
+    const handleMediaChange = (e: MediaQueryListEvent) => {
+      setReducedMotion(e.matches);
+    };
+    mediaQuery.addEventListener("change", handleMediaChange);
+
+    // Mouse Parallax normalized tracking
+    const handleMouseMove = (e: MouseEvent) => {
+      if (mediaQuery.matches) return;
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      setMousePos({ x, y });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleMediaChange);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="relative min-h-screen bg-[#030712] text-zinc-100 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Scroll-Driven 3D Blockchain Camera Canvas (Fixed background) */}
+      <Blockchain3DCameraCanvas mousePos={mousePos} reducedMotion={reducedMotion} />
+
+      {/* Top Progress & Hero Scroll Indicator */}
+      <ScrollIndicator />
+
+      {/* Interactive Storytelling Overlay Sections */}
+      <div className="relative z-10 space-y-0">
+        {/* 02 — HERO */}
+        <HeroSection />
+
+        {/* 03 — WHAT IS ORIGINCHAIN? */}
+        <WhatIsSection />
+
+        {/* 04 — HOW IT WORKS */}
+        <HowItWorksSection />
+
+        {/* 06 — PROOF OF ORIGIN */}
+        <ProofOfOriginSection />
+
+
+        {/* 07 — EXPLORE VERIFIED CREATIVITY */}
+        <ExploreAssetsSection />
+
+        {/* 08 — CREATOR REPUTATION */}
+        <ReputationSection />
+
+        {/* 09 — VERIFICATION */}
+        <VerificationSection />
+
+        {/* 10 — WHY ORIGINCHAIN */}
+        <WhyOriginChainSection />
+
+        {/* 11 — FINAL CTA */}
+        <FinalCtaSection />
+      </div>
     </div>
   );
 }

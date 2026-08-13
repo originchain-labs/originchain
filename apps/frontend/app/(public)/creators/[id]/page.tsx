@@ -1,6 +1,14 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getCreatorProfile, listAssets } from "@/lib/api-client";
+import { getCreatorProfile, listAssets, getCreatorReputation } from "@/lib/api-client";
+import { CreatorHero } from "@/components/creator/CreatorHero";
+import { CreatorVerificationBadgeCard } from "@/components/creator/CreatorVerificationBadgeCard";
+import { CreatorStatsBar } from "@/components/creator/CreatorStatsBar";
+import { FeaturedCreationCard } from "@/components/creator/FeaturedCreationCard";
+import { CreationsGrid } from "@/components/creator/CreationsGrid";
+import { CreatorTimeline } from "@/components/creator/CreatorTimeline";
+import { CreatorTrustSection } from "@/components/creator/CreatorTrustSection";
+import { DiscoverCreatorsGrid } from "@/components/creator/DiscoverCreatorsGrid";
+import { CreatorCtaSection } from "@/components/creator/CreatorCtaSection";
 import { ReputationBadge } from "@/components/creator/ReputationBadge";
 
 export default async function CreatorProfilePage({
@@ -18,41 +26,54 @@ export default async function CreatorProfilePage({
     const assetsData = await listAssets({ creatorId: id }).catch(() => ({ results: [], total: 0 }));
     const assets = assetsData.results || [];
 
+    const reputation = await getCreatorReputation(id).catch(() => null);
+
     return (
-        <div className="mx-auto max-w-4xl p-6">
-            <div className="mb-8 border-b border-zinc-200 pb-6">
-                <h1 className="text-2xl font-bold text-zinc-900">{profile.displayName}</h1>
-                <p className="mb-3 text-xs font-mono text-zinc-500">{profile.walletAddress}</p>
-                <div className="mb-4">
+        <div className="relative min-h-screen bg-[#030712] text-zinc-100 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+            {/* Ambient Background Grid & Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+
+            <div className="relative z-10 space-y-0">
+                {/* 01 — HERO */}
+                <CreatorHero
+                    displayName={profile.displayName}
+                    handle={`@${profile.displayName.toLowerCase().replace(/\s+/g, "_")}`}
+                    walletAddress={profile.walletAddress}
+                    bio={profile.bio ?? undefined}
+                />
+
+                {/* 01b — REAL REPUTATION SUMMARY (score · asset count · review count) */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-2 relative z-10">
                     <ReputationBadge creatorId={profile.id} />
                 </div>
-                {profile.bio && (
-                    <p className="text-sm text-zinc-700">{profile.bio}</p>
-                )}
-            </div>
 
-            <div>
-                <h2 className="mb-4 text-lg font-semibold text-zinc-900">Portfolio & Assets</h2>
-                {assets.length === 0 ? (
-                    <p className="text-sm text-zinc-500">No assets published yet.</p>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {assets.map((asset: { id: string; title: string; registeredAt?: string }) => (
-                            <Link
-                                key={asset.id}
-                                href={`/assets/${asset.id}`}
-                                className="block rounded border border-zinc-200 p-4 transition-colors hover:border-zinc-400"
-                            >
-                                <h3 className="font-medium text-zinc-900">{asset.title}</h3>
-                                {asset.registeredAt && (
-                                    <p className="mt-1 text-xs text-zinc-500">
-                                        {new Date(asset.registeredAt).toLocaleDateString()}
-                                    </p>
-                                )}
-                            </Link>
-                        ))}
-                    </div>
-                )}
+                {/* 02 — VERIFICATION BADGE */}
+                <CreatorVerificationBadgeCard />
+
+                {/* 03 — STATS BAR */}
+                <CreatorStatsBar
+                    registeredCount={assets.length}
+                    verifiedCount={assets.length}
+                    reputationScore={reputation?.score ?? 0}
+                />
+
+                {/* 04 — FEATURED CREATION (most recently registered asset, or hidden if none) */}
+                <FeaturedCreationCard asset={assets[0] ?? null} />
+
+                {/* 05 — REGISTERED CREATIONS */}
+                <CreationsGrid assets={assets} />
+
+                {/* 06 — TIMELINE */}
+                <CreatorTimeline assets={assets} />
+
+                {/* 07 — TRUST INDICATORS */}
+                <CreatorTrustSection assetCount={assets.length} reviewCount={reputation?.reviewCount ?? 0} />
+
+                {/* 08 — DISCOVER OTHER CREATORS */}
+                <DiscoverCreatorsGrid />
+
+                {/* 09 — FINAL CTA */}
+                <CreatorCtaSection />
             </div>
         </div>
     );

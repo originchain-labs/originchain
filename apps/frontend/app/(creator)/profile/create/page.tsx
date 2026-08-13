@@ -11,7 +11,7 @@ export default function CreateProfilePage() {
 
     return (
         <RequireAuth>
-            <div className="mx-auto max-w-md p-6">
+            <div className="mx-auto max-w-md px-6 pb-6 pt-24">
                 <h1 className="mb-4 text-xl font-semibold">Create your profile</h1>
                 <input
                     className="mb-3 w-full rounded border p-2"
