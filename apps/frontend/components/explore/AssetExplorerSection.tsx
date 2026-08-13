@@ -78,15 +78,21 @@ export function AssetExplorerSection() {
                         </h2>
                     </div>
 
-                    {/* Filter Tabs */}
+                    {/* Filter Tabs - only "All" is functional; category data isn't populated by the
+                        backend yet (assets have no category field, and no tags are seeded), so the
+                        rest are shown disabled rather than silently no-opping against real data. */}
                     <div className="flex flex-wrap items-center gap-2 bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 backdrop-blur-md">
                         {CATEGORIES.map((cat) => (
                             <button
                                 key={cat}
+                                disabled={cat !== "All"}
                                 onClick={() => setSelectedCategory(cat)}
+                                title={cat !== "All" ? "Category filtering coming soon" : undefined}
                                 className={`px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium transition-all ${
                                     selectedCategory === cat
                                         ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm"
+                                        : cat !== "All"
+                                        ? "text-zinc-600 cursor-not-allowed opacity-50"
                                         : "text-zinc-400 hover:text-white hover:bg-white/5"
                                 }`}
                             >

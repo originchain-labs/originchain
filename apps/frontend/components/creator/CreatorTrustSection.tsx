@@ -3,10 +3,27 @@
 import { motion } from "framer-motion";
 import { ShieldCheck, CheckCircle2, Award, Lock } from "lucide-react";
 
-export function CreatorTrustSection() {
+type Props = {
+    assetCount: number;
+    reviewCount: number;
+};
+
+export function CreatorTrustSection({ assetCount, reviewCount }: Props) {
     const indicators = [
-        { title: "VERIFIED CREATIONS", val: "21 Assets", desc: "21 registered assets have completed on-chain origin verification.", icon: ShieldCheck, color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10" },
-        { title: "PROOF COMPLETION", val: "100%", desc: "100% of proof certificates contain valid SHA-256 digests and IPFS CIDs.", icon: Award, color: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" },
+        {
+            title: "VERIFIED CREATIONS",
+            val: `${assetCount} Asset${assetCount !== 1 ? "s" : ""}`,
+            desc: `${assetCount} registered asset${assetCount !== 1 ? "s have" : " has"} completed on-chain origin verification.`,
+            icon: ShieldCheck,
+            color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+        },
+        {
+            title: "COMMUNITY REVIEWS",
+            val: `${reviewCount} Review${reviewCount !== 1 ? "s" : ""}`,
+            desc: `${reviewCount} review${reviewCount !== 1 ? "s" : ""} contribute to this creator's on-chain reputation score.`,
+            icon: Award,
+            color: "text-cyan-400 border-cyan-500/30 bg-cyan-500/10",
+        },
         { title: "ON-CHAIN HISTORY", val: "Arbitrum", desc: "Transactions anchored directly to Arbitrum Sepolia smart contracts.", icon: Lock, color: "text-violet-400 border-violet-500/30 bg-violet-500/10" },
     ];
 

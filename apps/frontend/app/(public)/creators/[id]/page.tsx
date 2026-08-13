@@ -9,6 +9,7 @@ import { CreatorTimeline } from "@/components/creator/CreatorTimeline";
 import { CreatorTrustSection } from "@/components/creator/CreatorTrustSection";
 import { DiscoverCreatorsGrid } from "@/components/creator/DiscoverCreatorsGrid";
 import { CreatorCtaSection } from "@/components/creator/CreatorCtaSection";
+import { ReputationBadge } from "@/components/creator/ReputationBadge";
 
 export default async function CreatorProfilePage({
     params,
@@ -41,6 +42,11 @@ export default async function CreatorProfilePage({
                     bio={profile.bio ?? undefined}
                 />
 
+                {/* 01b — REAL REPUTATION SUMMARY (score · asset count · review count) */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 mb-2 relative z-10">
+                    <ReputationBadge creatorId={profile.id} />
+                </div>
+
                 {/* 02 — VERIFICATION BADGE */}
                 <CreatorVerificationBadgeCard />
 
@@ -61,7 +67,7 @@ export default async function CreatorProfilePage({
                 <CreatorTimeline />
 
                 {/* 07 — TRUST INDICATORS */}
-                <CreatorTrustSection />
+                <CreatorTrustSection assetCount={assets.length} reviewCount={reputation?.reviewCount ?? 0} />
 
                 {/* 08 — DISCOVER OTHER CREATORS */}
                 <DiscoverCreatorsGrid />
