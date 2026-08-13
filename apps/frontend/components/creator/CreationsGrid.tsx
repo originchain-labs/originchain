@@ -18,15 +18,7 @@ type Props = {
     assets: Asset[];
 };
 
-const MOCK_CREATOR_ASSETS: Asset[] = [
-    { id: "asset-1", title: "Quantum Genesis Canvas #04", description: "Generative matrix sealed with SHA-256 origin proof.", registeredAt: "2026-08-12", category: "Digital Artwork", ipfsCid: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco" },
-    { id: "asset-2", title: "Arbitrum Swarm Smart Contract Spec", description: "Formal spec for multi-agent contract execution.", registeredAt: "2026-08-10", category: "Document & IP", ipfsCid: "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG" },
-    { id: "asset-3", title: "Sub-Zero Synthesizer Audio Stem", description: "Original uncompressed audio stem registered on IPFS.", registeredAt: "2026-08-08", category: "Creative Audio", ipfsCid: "QmZTR5bcpQDogVKTBABzM43WgP4gBum731nsktzn3s6hXY" },
-    { id: "asset-4", title: "Luxury Watch Chronograph Passport", description: "Physical watch origin certificate backed by NFC chip.", registeredAt: "2026-08-05", category: "Physical Provenance", ipfsCid: "QmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZvG7uKm" },
-];
-
 export function CreationsGrid({ assets = [] }: Props) {
-    const displayAssets = assets.length > 0 ? assets : MOCK_CREATOR_ASSETS;
     const [selectedCategory, setSelectedCategory] = useState("ALL");
 
     const categories = ["ALL", "VERIFIED", "DIGITAL", "DOCUMENT", "CREATIVE"];
@@ -59,8 +51,11 @@ export function CreationsGrid({ assets = [] }: Props) {
                     </div>
                 </div>
 
+                {assets.length === 0 ? (
+                    <p className="text-sm text-zinc-400 font-mono">No assets registered yet.</p>
+                ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {displayAssets.map((asset, idx) => (
+                    {assets.map((asset, idx) => (
                         <motion.div
                             key={asset.id || idx}
                             initial={{ opacity: 0, y: 20 }}
@@ -100,6 +95,7 @@ export function CreationsGrid({ assets = [] }: Props) {
                         </motion.div>
                     ))}
                 </div>
+                )}
             </div>
         </section>
     );
