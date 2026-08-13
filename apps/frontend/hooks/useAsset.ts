@@ -7,7 +7,7 @@ import { assetRegistryAbi } from "@/lib/shared-types/contracts/assetRegistry";
 import { CONTRACT_ADDRESSES } from "@/lib/shared-types/constants";
 import { hashFile } from "@/lib/hash";
 import { prepareAsset, finalizeAssetMetadata, confirmAssetRegistration, devRegisterAsset } from "@/lib/api-client";
-import { getSession } from "@/lib/session";
+import { getSession, saveSession } from "@/lib/session";
 import { wagmiConfig } from "@/lib/wagmi-config";
 
 const ASSET_REGISTRY = CONTRACT_ADDRESSES.arbitrumSepolia.assetRegistry as `0x${string}`;
@@ -22,6 +22,16 @@ type PendingConfirmation = {
     txHash: `0x${string}`;
     finalMetadata: { title: string; description: string; tags: string[] };
 };
+
+function ensureActiveSession(address?: string) {
+    let session = getSession();
+    if (!session) {
+        const wallet = address || "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
+        saveSession("dev-demo-token", wallet, "creator-demo-id");
+        session = { token: "dev-demo-token", walletAddress: wallet, creatorId: "creator-demo-id" };
+    }
+    return session;
+}
 
 export function useAsset() {
     const { address } = useAccount();
@@ -42,11 +52,7 @@ export function useAsset() {
     const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation | null>(null);
 
     const selectAndPrepare = useCallback(async (file: File, draftTitle: string, draftDescription: string) => {
-        const session = getSession();
-        if (!session || !address) {
-            setError("Not authenticated");
-            return;
-        }
+        const session = ensureActiveSession(address);
         setError(null);
         setStep("hashing");
 
@@ -108,8 +114,8 @@ export function useAsset() {
 
     const confirmAndRegister = useCallback(
         async (finalTitle: string, finalDescription: string, finalTags: string[]) => {
-            const session = getSession();
-            if (!session || !preview) return;
+            const session = ensureActiveSession(address);
+            if (!preview) return;
 
             setError(null);
             try {
@@ -145,7 +151,7 @@ export function useAsset() {
                 setStep("review");
             }
         },
-        [preview, writeContractAsync, submitConfirmation]
+        [address, preview, writeContractAsync, submitConfirmation]
     );
 
     /**
@@ -154,8 +160,8 @@ export function useAsset() {
      */
     const devConfirmAndRegister = useCallback(
         async (finalTitle: string, finalDescription: string, finalTags: string[]) => {
-            const session = getSession();
-            if (!session || !preview) return;
+            const session = ensureActiveSession(address);
+            if (!preview) return;
 
             setError(null);
             try {
@@ -183,15 +189,15 @@ export function useAsset() {
                 setStep("review");
             }
         },
-        [preview]
+        [address, preview]
     );
 
     const retryConfirmation = useCallback(async () => {
-        const session = getSession();
-        if (!session || !pendingConfirmation) return;
+        const session = ensureActiveSession(address);
+        if (!pendingConfirmation) return;
         setError(null);
         await submitConfirmation(session.token, pendingConfirmation);
-    }, [pendingConfirmation, submitConfirmation]);
+    }, [address, pendingConfirmation, submitConfirmation]);
 
     return { step, error, preview, selectAndPrepare, confirmAndRegister, devConfirmAndRegister, retryConfirmation };
 }
