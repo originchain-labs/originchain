@@ -161,6 +161,7 @@ Practical, granular tasks grouped by domain. Check off as you go — this is the
 - [ ] Style wallet connect header
 - [ ] Style creator profile creation/edit flow
 - [ ] Style asset upload/browse screens
+- [ ] `/assets` renders in the old plain light theme (white background, black text) while the rest of the site (including the header/footer directly above/below it) now uses the dark theme adopted during the Frenil UI recovery merge — visible seam, kept deliberately unstyled on that branch since the fix was scoped to data correctness, not visual design
 - [ ] Style public verification page
 - [ ] Style review/reputation displays
 - [ ] Responsive/mobile-friendly pass
