@@ -336,7 +336,13 @@ export async function createProfile(data: { displayName: string; bio?: string; a
     }
 }
 
-export async function updateCreatorProfile(data: { displayName?: string; bio?: string; avatarCid?: string }, token: string) {
+export async function updateCreatorProfile(
+    arg1: string | { displayName?: string; bio?: string; avatarCid?: string },
+    arg2?: { displayName?: string; bio?: string; avatarCid?: string } | string,
+    arg3?: string
+) {
+    const data = typeof arg1 === "object" ? arg1 : (typeof arg2 === "object" ? arg2 : {});
+    const token = typeof arg2 === "string" ? arg2 : arg3;
     try {
         const res = await fetch(`${API_URL}/api/v1/profile/edit`, {
             method: "PUT",
