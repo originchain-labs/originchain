@@ -1,83 +1,59 @@
 "use client";
 
 import { useState } from "react";
-import { hashFile } from "@/lib/hash";
-import { verifyAsset } from "@/lib/api-client";
+import { VerifyHero } from "@/components/verify/VerifyHero";
+import { MainVerifyInterface } from "@/components/verify/MainVerifyInterface";
+import { VerificationResultDetails } from "@/components/verify/VerificationResultDetails";
+import { RecentVerificationsFeed } from "@/components/verify/RecentVerificationsFeed";
+import { WhyVerifySection } from "@/components/verify/WhyVerifySection";
+import { VerifyCtaSection } from "@/components/verify/VerifyCtaSection";
+import type { verifyAsset } from "@/lib/api-client";
+
+type VerifyResult = Awaited<ReturnType<typeof verifyAsset>>;
 
 export default function VerifyPage() {
-    const [result, setResult] = useState<Awaited<ReturnType<typeof verifyAsset>> | null>(null);
-    const [checking, setChecking] = useState(false);
-    const [manualHash, setManualHash] = useState("");
+    const [verificationResult, setVerificationResult] = useState<VerifyResult | null>(null);
+    const [currentQuery, setCurrentQuery] = useState("");
 
-    async function checkFile(file: File) {
-        setChecking(true);
-        try {
-            const hash = await hashFile(file);
-            const res = await verifyAsset({ hash });
-            setResult(res);
-        } catch {
-            setResult({ verified: false });
-        } finally {
-            setChecking(false);
-        }
-    }
+    const handleResult = (res: VerifyResult, queryStr: string) => {
+        setVerificationResult(res);
+        setCurrentQuery(queryStr);
+    };
 
-    async function checkHash() {
-        if (!manualHash) return;
-        setChecking(true);
-        try {
-            const res = await verifyAsset({ hash: manualHash });
-            setResult(res);
-        } catch {
-            setResult({ verified: false });
-        } finally {
-            setChecking(false);
-        }
-    }
+    const handleReset = () => {
+        setVerificationResult(null);
+        setCurrentQuery("");
+    };
 
     return (
-        <div className="mx-auto max-w-xl p-6">
-            <h1 className="mb-2 text-xl font-semibold">Verify an Asset</h1>
-            <p className="mb-6 text-sm text-zinc-500">
-                No wallet required. Upload a file to check if it's registered, or paste a known content hash.
-            </p>
+        <div className="relative min-h-screen bg-[#030712] text-zinc-100 overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+            {/* Ambient Background Grid & Glow */}
+            <div className="fixed inset-0 pointer-events-none z-0 bg-[linear-gradient(to_right,#1f293715_1px,transparent_1px),linear-gradient(to_bottom,#1f293715_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
-            <input
-                type="file"
-                onChange={(e) => e.target.files?.[0] && checkFile(e.target.files[0])}
-                className="mb-4 w-full"
-            />
+            <div className="relative z-10 space-y-0">
+                {/* 01 — HERO */}
+                <VerifyHero />
 
-            <div className="mb-6 flex gap-2">
-                <input
-                    className="flex-1 rounded border p-2 text-sm"
-                    placeholder="0x... content hash"
-                    value={manualHash}
-                    onChange={(e) => setManualHash(e.target.value)}
-                />
-                <button onClick={checkHash} className="rounded bg-zinc-950 px-4 py-2 text-sm text-white">
-                    Check
-                </button>
+                {/* 02 — MAIN VERIFICATION INTERFACE & RESULT DETAILS */}
+                {!verificationResult ? (
+                    <MainVerifyInterface onVerificationResult={handleResult} />
+                ) : (
+                    <VerificationResultDetails
+                        result={verificationResult}
+                        queryStr={currentQuery}
+                        onReset={handleReset}
+                    />
+                )}
+
+                {/* 03 — RECENT VERIFICATIONS FEED */}
+                <RecentVerificationsFeed />
+
+                {/* 04 — WHY VERIFY */}
+                <WhyVerifySection />
+
+                {/* 05 — FINAL CTA */}
+                <VerifyCtaSection />
             </div>
-
-            {checking && <p className="text-sm text-zinc-500">Checking...</p>}
-
-            {result && !checking && (
-                <div className={`rounded border p-4 ${result.verified ? "border-green-600" : "border-red-600"}`}>
-                    {result.verified ? (
-                        <>
-                            <p className="mb-2 font-medium text-green-700">✓ Verified</p>
-                            <p className="text-sm">{result.asset?.title}</p>
-                            <p className="text-sm text-zinc-500">by {result.creatorDisplayName}</p>
-                            <p className="mt-2 break-all text-xs text-zinc-500">
-                                Registered: {result.asset && new Date(result.asset.registeredAt).toLocaleString()}
-                            </p>
-                        </>
-                    ) : (
-                        <p className="font-medium text-red-700">✗ Not Verified — no matching registration found</p>
-                    )}
-                </div>
-            )}
         </div>
     );
 }

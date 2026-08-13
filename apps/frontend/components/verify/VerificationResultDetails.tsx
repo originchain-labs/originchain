@@ -54,14 +54,14 @@ export function VerificationResultDetails({ result, queryStr, onReset }: Props) 
 
     const isVerified = result.verified;
     const asset = result.asset || {};
-    const title = asset.title || "Origin Genesis Masterwork #01";
-    const contentHash = asset.contentHash || "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-    const registeredAt = asset.registeredAt ? new Date(asset.registeredAt).toUTCString() : "2026-08-12 22:25:00 UTC";
-    const txHash = asset.txHash || "0x89C44D1F8271C789A24F1299B03A911F8288F9A2";
-    const proofId = asset.proofId || "#OC-891042";
-    const ipfsCid = asset.ipfsCid || "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco";
-    const creator = result.creatorDisplayName || "Elena Vance (@cyber_artisan)";
-    const creatorAddr = result.creatorAddress || "0x71C789A24F1299B03A911F82";
+    const title = asset.title || "Untitled Asset";
+    const contentHash = asset.contentHash || "—";
+    const registeredAt = asset.registeredAt ? new Date(asset.registeredAt).toUTCString() : "—";
+    const txHash = asset.txHash || "—";
+    const proofId = asset.proofId || "—";
+    const ipfsCid = asset.ipfsCid || "—";
+    const creator = result.creatorDisplayName || "Unknown creator";
+    const creatorAddr = result.creatorAddress || "—";
 
     if (!isVerified) {
         return (
@@ -206,33 +206,19 @@ export function VerificationResultDetails({ result, queryStr, onReset }: Props) 
                         </button>
                     </div>
 
-                    {/* Block Info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
-                            <span className="text-zinc-400 text-[11px]">BLOCK NUMBER</span>
-                            <div className="text-white font-bold">#948102</div>
+                    {asset.txHash && (
+                        <div className="pt-2">
+                            <a
+                                href={`https://sepolia.arbiscan.io/tx/${asset.txHash}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-2 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
+                            >
+                                <span>View on Arbitrum Block Explorer</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
                         </div>
-                        <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
-                            <span className="text-zinc-400 text-[11px]">CONFIRMATIONS</span>
-                            <div className="text-emerald-400 font-bold">128 Blocks (Finalized)</div>
-                        </div>
-                        <div className="p-4 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
-                            <span className="text-zinc-400 text-[11px]">CONTRACT ADDRESS</span>
-                            <div className="text-zinc-300 font-bold truncate">0x8F21...A92D</div>
-                        </div>
-                    </div>
-
-                    <div className="pt-2">
-                        <a
-                            href={`https://sepolia.arbiscan.io/tx/${txHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-xs font-mono font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
-                        >
-                            <span>View on Arbitrum Block Explorer</span>
-                            <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                    </div>
+                    )}
                 </div>
             </div>
 

@@ -7,9 +7,13 @@ import { hashFile } from "@/lib/hash";
 import { verifyAsset } from "@/lib/api-client";
 import { VerificationSequenceAnim } from "./VerificationSequenceAnim";
 
+type VerifyResult = Awaited<ReturnType<typeof verifyAsset>>;
+
 type Props = {
-    onVerificationResult: (res: any, queryStr: string) => void;
+    onVerificationResult: (res: VerifyResult, queryStr: string) => void;
 };
+
+const HASH_PATTERN = /^0x[0-9a-f]{64}$/i;
 
 const DEMO_PROOFS = [
     { label: "Genesis Canvas Hash", val: "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" },
@@ -36,45 +40,16 @@ export function MainVerifyInterface({ onVerificationResult }: Props) {
         }
 
         try {
-            const res = await verifyAsset({ hash: queryStr.trim(), proofId: queryStr.trim() });
+            const trimmed = queryStr.trim();
+            const res = await verifyAsset(
+                HASH_PATTERN.test(trimmed) ? { hash: trimmed } : { proofId: trimmed }
+            );
             setAnimStep(5);
             await new Promise((r) => setTimeout(r, 200));
 
-            // If API returns result, pass it to parent
-            if (res && res.verified) {
-                onVerificationResult(res, queryStr);
-            } else {
-                // Return structured fallback result for demo queries or valid query string
-                onVerificationResult({
-                    verified: true,
-                    asset: {
-                        id: queryStr.trim(),
-                        title: queryStr.includes("asset") ? "Quantum Genesis Canvas #04" : "Verified Origin Work",
-                        contentHash: queryStr.length > 20 ? queryStr.trim() : "0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-                        registeredAt: "2026-08-12T22:25:00Z",
-                        txHash: "0x89C44D1F8271C789A24F1299B03A911F8288F9A2",
-                        proofId: "#OC-891042",
-                        ipfsCid: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
-                    },
-                    creatorAddress: "0x71C789A24F1299B03A911F82",
-                    creatorDisplayName: "Elena Vance (@cyber_artisan)",
-                }, queryStr);
-            }
+            onVerificationResult(res, queryStr);
         } catch {
-            onVerificationResult({
-                verified: true,
-                asset: {
-                    id: queryStr.trim(),
-                    title: "Origin Genesis Masterwork #01",
-                    contentHash: queryStr.trim(),
-                    registeredAt: "2026-08-12T22:25:00Z",
-                    txHash: "0x89C44D1F8271C789A24F1299B03A911F8288F9A2",
-                    proofId: "#OC-891042",
-                    ipfsCid: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
-                },
-                creatorAddress: "0x71C789A24F1299B03A911F82",
-                creatorDisplayName: "Elena Vance (@cyber_artisan)",
-            }, queryStr);
+            onVerificationResult({ verified: false }, queryStr);
         } finally {
             setIsVerifying(false);
         }
