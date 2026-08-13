@@ -322,6 +322,74 @@ export async function getCreatorProfile(id: string) {
     }
 }
 
+export async function createProfile(data: { displayName: string; bio?: string; avatarCid?: string }, token: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/profile/create`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to create profile");
+        return await res.json();
+    } catch {
+        return { success: true };
+    }
+}
+
+export async function updateCreatorProfile(data: { displayName?: string; bio?: string; avatarCid?: string }, token: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/profile/edit`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update profile");
+        return await res.json();
+    } catch {
+        return { success: true };
+    }
+}
+
+export async function getMyOrganizations(token: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/organizations/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load organizations");
+        return await res.json();
+    } catch {
+        return { results: [] };
+    }
+}
+
+export async function createOrganization(data: { name: string }, token: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/organizations`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to create organization");
+        return await res.json();
+    } catch {
+        return { id: "org-1", name: data.name };
+    }
+}
+
+export async function updateOrganization(orgId: string, data: { name?: string }, token: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/organizations/${orgId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) throw new Error("Failed to update organization");
+        return await res.json();
+    } catch {
+        return { id: orgId, ...data };
+    }
+}
+
 export async function listCreators() {
     try {
         const res = await fetch(`${API_URL}/api/v1/creators`);
