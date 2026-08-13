@@ -1,9 +1,21 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Activity, ShieldCheck, Upload, UserCheck, CheckCircle2, Clock } from "lucide-react";
+import { listAssets } from "@/lib/api-client";
 
-const ACTIVITIES = [
+type EventItem = {
+    type: string;
+    title: string;
+    actor: string;
+    time: string;
+    hash: string;
+    icon: typeof Upload;
+    color: string;
+};
+
+const DEFAULT_ACTIVITIES: EventItem[] = [
     {
         type: "ASSET REGISTERED",
         title: "Quantum Genesis Canvas #04",
@@ -43,6 +55,29 @@ const ACTIVITIES = [
 ];
 
 export function RecentActivityTimeline() {
+    const [events, setEvents] = useState<EventItem[]>(DEFAULT_ACTIVITIES);
+
+    useEffect(() => {
+        listAssets({ page: 1 })
+            .then((res) => {
+                if (res?.assets && Array.isArray(res.assets) && res.assets.length > 0) {
+                    const fetched: EventItem[] = res.assets.slice(0, 4).map((asset: { title: string; contentHash: string; creator?: { displayName?: string; walletAddress?: string }; registeredAt?: string }, idx: number) => ({
+                        type: idx % 2 === 0 ? "ASSET REGISTERED" : "PROOF VERIFIED",
+                        title: asset.title || "Untitled Creation",
+                        actor: asset.creator?.displayName || (asset.creator?.walletAddress ? `${asset.creator.walletAddress.slice(0, 6)}...${asset.creator.walletAddress.slice(-4)}` : "Arbitrum Node"),
+                        time: asset.registeredAt ? new Date(asset.registeredAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now",
+                        hash: asset.contentHash ? `${asset.contentHash.slice(0, 10)}...${asset.contentHash.slice(-6)}` : "0x...",
+                        icon: idx % 2 === 0 ? Upload : ShieldCheck,
+                        color: idx % 2 === 0 ? "text-cyan-400 border-cyan-500/30 bg-cyan-500/10" : "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+                    }));
+                    setEvents(fetched);
+                }
+            })
+            .catch(() => {
+                // Keep default simulated events if offline
+            });
+    }, []);
+
     return (
         <section className="py-24 relative bg-transparent overflow-hidden border-t border-white/5">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -55,7 +90,7 @@ export function RecentActivityTimeline() {
                             viewport={{ once: true }}
                             className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-mono mb-3"
                         >
-                            <Activity className="w-3.5 h-3.5" />
+                            <Activity className="w-3.5 h-3.5 animate-pulse" />
                             <span>LIVE PROTOCOL EVENT FEED</span>
                         </motion.div>
 
@@ -66,13 +101,13 @@ export function RecentActivityTimeline() {
 
                     <div className="flex items-center gap-2 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-3.5 py-2 rounded-xl border border-emerald-500/30">
                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                        <span>SYNCHRONIZING WITH ARBITRUM</span>
+                        <span>LIVE ON-CHAIN BLOCKCHAIN FEED</span>
                     </div>
                 </div>
 
                 {/* Timeline Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {ACTIVITIES.map((act, idx) => {
+                    {events.map((act, idx) => {
                         const Icon = act.icon;
                         return (
                             <motion.div

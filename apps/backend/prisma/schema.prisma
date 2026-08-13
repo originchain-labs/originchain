@@ -75,6 +75,7 @@ model Asset {
   onChainConfirmed  Boolean  @default(false)
   certificateCid    String?  @db.VarChar(100)
   proofId           String?  @unique @db.VarChar(20)
+  pHash             String?  @db.VarChar(32)
 
   @@map("assets")
   @@index([creatorId])

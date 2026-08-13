@@ -36,6 +36,8 @@ export function useAsset() {
         title: string;
         description: string;
         tags: string[];
+        pHash?: string;
+        similarityWarning?: { matchedTitle: string; similarityScore: number; creatorName: string } | null;
     } | null>(null);
     const [pendingConfirmation, setPendingConfirmation] = useState<PendingConfirmation | null>(null);
 
@@ -52,12 +54,20 @@ export function useAsset() {
             const clientHash = await hashFile(file);
 
             setStep("preparing");
-            const { contentHash, ipfsCid, suggestedMetadata } = await prepareAsset(
+            const res = await prepareAsset(
                 file,
                 draftTitle,
                 draftDescription,
                 session.token
-            );
+            ) as {
+                contentHash: string;
+                ipfsCid: string;
+                suggestedMetadata?: { title: string; description: string; tags: string[] } | null;
+                pHash?: string;
+                similarityWarning?: { matchedTitle: string; similarityScore: number; creatorName: string } | null;
+            };
+
+            const { contentHash, ipfsCid, suggestedMetadata, pHash, similarityWarning } = res;
 
             if (clientHash.toLowerCase() !== contentHash.toLowerCase()) {
                 throw new Error("Hash mismatch between client and server — please retry");
@@ -70,6 +80,8 @@ export function useAsset() {
                 title: suggestedMetadata?.title ?? draftTitle,
                 description: suggestedMetadata?.description ?? draftDescription,
                 tags: suggestedMetadata?.tags ?? [],
+                pHash,
+                similarityWarning,
             });
             setStep("review");
         } catch (err) {
@@ -160,6 +172,7 @@ export function useAsset() {
                         ipfsCid: preview.ipfsCid,
                         metadataCid,
                         finalMetadata: { title: finalTitle, description: finalDescription, tags: finalTags },
+                        pHash: preview.pHash,
                     },
                     session.token
                 );

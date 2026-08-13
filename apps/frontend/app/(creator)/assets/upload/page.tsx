@@ -263,6 +263,19 @@ export default function UploadAssetPage() {
                                         </div>
                                     </div>
 
+                                    {/* Perceptual Plagiarism Similarity Warning */}
+                                    {preview.similarityWarning && (
+                                        <div className="flex items-start gap-3 rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-amber-300 text-xs font-mono mb-4">
+                                            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                                            <div>
+                                                <span className="font-bold text-amber-200">Perceptual Anti-Plagiarism Warning ({preview.similarityWarning.similarityScore}% Visual Match)</span>
+                                                <p className="text-zinc-300 mt-1">
+                                                    This artwork has high visual similarity to &quot;{preview.similarityWarning.matchedTitle}&quot; by {preview.similarityWarning.creatorName}.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Dev mode badge */}
                                     {devMode && (
                                         <div className="flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2.5 text-xs text-emerald-400 font-mono mb-4">

@@ -5,6 +5,7 @@ import { storageService } from "./storage/index.js";
 import { suggestMetadata } from "./ai/gemini.provider.js";
 import { detectAndValidateFileType, sanitizeFileName, validateImageBuffer } from "../utils/upload-validator.js";
 import { getTransactionReceipt } from "./blockchain/read.js";
+import { computePerceptualHash, hammingDistance } from "../utils/perceptual-hash.js";
 
 const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) });
 
@@ -22,12 +23,39 @@ export async function prepareAsset(
     // Server-side hash re-verification on EXACT original bytes — never trust client hash
     const contentHash = "0x" + createHash("sha256").update(validatedBuffer).digest("hex");
 
+    // Perceptual dHash computation for anti-plagiarism visual comparison
+    const pHash = await computePerceptualHash(validatedBuffer);
+    let similarityWarning: { matchedTitle: string; similarityScore: number; creatorName: string } | null = null;
+
+    if (pHash) {
+        const existingAssets = await prisma.asset.findMany({
+            where: { pHash: { not: null } },
+            select: { id: true, title: true, pHash: true, creator: { select: { displayName: true } } },
+            take: 200,
+        });
+
+        for (const asset of existingAssets) {
+            if (asset.pHash) {
+                const dist = hammingDistance(pHash, asset.pHash);
+                if (dist <= 12) {
+                    const score = Math.round((1 - dist / 64) * 100);
+                    similarityWarning = {
+                        matchedTitle: asset.title,
+                        similarityScore: score,
+                        creatorName: asset.creator.displayName,
+                    };
+                    break;
+                }
+            }
+        }
+    }
+
     const file = new File([new Uint8Array(validatedBuffer)], cleanFileName, { type: detected.mime });
     const { cid: ipfsCid } = await storageService.pinFile(file);
 
     const suggestedMetadata = await suggestMetadata(title, description);
 
-    return { contentHash, ipfsCid, suggestedMetadata };
+    return { contentHash, ipfsCid, suggestedMetadata, pHash, similarityWarning };
 }
 
 export async function finalizeMetadata(finalMetadata: {
@@ -52,7 +80,8 @@ export async function confirmAsset(
     ipfsCid: string,
     metadataCid: string,
     txHash: `0x${string}`,
-    finalMetadata: { title: string; description?: string; tags?: string[] }
+    finalMetadata: { title: string; description?: string; tags?: string[] },
+    pHash?: string
 ) {
     let creator = await prisma.creator.findUnique({ where: { walletAddress } });
     if (!creator) {
@@ -86,6 +115,7 @@ export async function confirmAsset(
             txHash,
             registeredAt: new Date(),
             onChainConfirmed: true,
+            pHash: pHash ?? null,
         },
     });
 
@@ -128,7 +158,8 @@ export async function devRegisterAsset(
     contentHash: string,
     ipfsCid: string,
     metadataCid: string,
-    finalMetadata: { title: string; description?: string; tags?: string[] }
+    finalMetadata: { title: string; description?: string; tags?: string[] },
+    pHash?: string
 ) {
     let creator = await prisma.creator.findUnique({ where: { walletAddress } });
     if (!creator) {
@@ -160,6 +191,7 @@ export async function devRegisterAsset(
             txHash: mockTxHash,
             registeredAt: new Date(),
             onChainConfirmed: true, // Mark as confirmed so it shows in lists
+            pHash: pHash ?? null,
         },
     });
 

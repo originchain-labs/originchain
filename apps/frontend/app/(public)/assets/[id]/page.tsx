@@ -15,7 +15,7 @@ export default async function AssetDetailPage({
         notFound();
     }
 
-    const certificate = asset.proofId ? await getCertificate(id) : null;
+    const certificate = await getCertificate(id).catch(() => null);
 
     return (
         <div className="relative min-h-screen bg-[#030712] text-zinc-100 overflow-hidden">

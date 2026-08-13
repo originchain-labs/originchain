@@ -84,6 +84,7 @@ export async function devRegisterAsset(
         ipfsCid: string;
         metadataCid: string;
         finalMetadata: { title: string; description?: string; tags?: string[] };
+        pHash?: string;
     },
     token: string
 ) {

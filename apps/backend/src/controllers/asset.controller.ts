@@ -46,8 +46,8 @@ export async function finalize(req: AuthedRequest, res: Response) {
 
 export async function confirm(req: AuthedRequest, res: Response) {
     try {
-        const { contentHash, ipfsCid, metadataCid, txHash, finalMetadata } = req.body;
-        const asset = await confirmAsset(req.walletAddress!, contentHash, ipfsCid, metadataCid, txHash, finalMetadata);
+        const { contentHash, ipfsCid, metadataCid, txHash, finalMetadata, pHash } = req.body;
+        const asset = await confirmAsset(req.walletAddress!, contentHash, ipfsCid, metadataCid, txHash, finalMetadata, pHash);
         res.status(201).json({ asset });
     } catch (err) {
         const message = err instanceof Error ? err.message : "UNKNOWN_ERROR";
@@ -63,8 +63,8 @@ export async function confirm(req: AuthedRequest, res: Response) {
 
 export async function devRegister(req: AuthedRequest, res: Response) {
     try {
-        const { contentHash, ipfsCid, metadataCid, finalMetadata } = req.body;
-        const asset = await devRegisterAsset(req.walletAddress!, contentHash, ipfsCid, metadataCid, finalMetadata);
+        const { contentHash, ipfsCid, metadataCid, finalMetadata, pHash } = req.body;
+        const asset = await devRegisterAsset(req.walletAddress!, contentHash, ipfsCid, metadataCid, finalMetadata, pHash);
         res.status(201).json({ asset });
     } catch (err) {
         const message = err instanceof Error ? err.message : "UNKNOWN_ERROR";
