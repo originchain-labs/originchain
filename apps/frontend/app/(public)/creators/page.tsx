@@ -38,7 +38,7 @@ export default function CreatorsIndexPage() {
                 <CreationsGrid assets={[]} />
 
                 {/* 06 — TIMELINE */}
-                <CreatorTimeline />
+                <CreatorTimeline assets={[]} />
 
                 {/* 07 — TRUST INDICATORS */}
                 <CreatorTrustSection assetCount={0} reviewCount={0} />

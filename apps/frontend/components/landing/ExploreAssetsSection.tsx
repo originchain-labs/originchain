@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShieldCheck, ArrowRight, Star, Tag, User } from "lucide-react";
+import { ShieldCheck, ArrowRight, Tag, User } from "lucide-react";
 import { listAssets } from "@/lib/api-client";
 
 type Asset = {
@@ -17,36 +17,6 @@ type Asset = {
     reputationScore?: number;
 };
 
-const SAMPLE_VERIFIED_ASSETS: Asset[] = [
-    {
-        id: "asset-1",
-        title: "Quantum Consciousness Artwork #04",
-        description: "Generative digital canvas sealed with SHA-256 origin proof.",
-        ipfsCid: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
-        creator: { walletAddress: "0x3A9...1F82", handle: "cyber_artisan" },
-        tags: ["Digital Art", "Generative", "Proof-of-Origin"],
-        reputationScore: 98,
-    },
-    {
-        id: "asset-2",
-        title: "Autonomous Agent Smart Logic Spec",
-        description: "Formal specification document for decentralized agent swarm.",
-        ipfsCid: "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
-        creator: { walletAddress: "0x89C...44D1", handle: "solidity_architect" },
-        tags: ["Smart Contracts", "AI", "Arbitrum"],
-        reputationScore: 95,
-    },
-    {
-        id: "asset-3",
-        title: "Sub-Zero Audio Synthesis Stem",
-        description: "Master audio recording hash with decentralized IPFS metadata.",
-        ipfsCid: "QmZTR5bcpQDogVKTBABzM43WgP4gBum731nsktzn3s6hXY",
-        creator: { walletAddress: "0x71D...90B3", handle: "synth_wave" },
-        tags: ["Audio", "Mastering", "Music-IP"],
-        reputationScore: 100,
-    },
-];
-
 export function ExploreAssetsSection() {
     const [assets, setAssets] = useState<Asset[]>([]);
     const [loading, setLoading] = useState(true);
@@ -56,13 +26,11 @@ export function ExploreAssetsSection() {
         async function fetchRealAssets() {
             try {
                 const res = await listAssets({ page: 1 });
-                if (isMounted && res && Array.isArray(res.items) && res.items.length > 0) {
-                    setAssets(res.items.slice(0, 3));
-                } else if (isMounted) {
-                    setAssets(SAMPLE_VERIFIED_ASSETS);
+                if (isMounted && res && Array.isArray(res.results)) {
+                    setAssets(res.results.slice(0, 3));
                 }
             } catch {
-                if (isMounted) setAssets(SAMPLE_VERIFIED_ASSETS);
+                if (isMounted) setAssets([]);
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -117,6 +85,8 @@ export function ExploreAssetsSection() {
                             <div key={n} className="h-80 rounded-2xl bg-slate-900/40 border border-white/5 animate-pulse" />
                         ))}
                     </div>
+                ) : assets.length === 0 ? (
+                    <p className="text-sm text-zinc-400 font-mono">No assets registered yet.</p>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {assets.map((asset, idx) => (
@@ -134,10 +104,6 @@ export function ExploreAssetsSection() {
                                         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono">
                                             <ShieldCheck className="w-3.5 h-3.5" />
                                             <span>VERIFIED RECORD</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-amber-400 text-xs font-mono">
-                                            <Star className="w-3.5 h-3.5 fill-amber-400" />
-                                            <span>{asset.reputationScore ?? 98}/100</span>
                                         </div>
                                     </div>
 

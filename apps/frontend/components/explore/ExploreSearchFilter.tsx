@@ -1,26 +1,68 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Hash, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
+import { Search, Filter, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { search } from "@/lib/api-client";
 
-const QUICK_FILTERS = ["All", "Assets", "Creators", "Verified", "Recent"];
+const QUICK_FILTERS = ["All", "Assets", "Creators", "Verified"];
 
-const DEMO_SEARCH_RESULTS = [
-    { type: "Asset", title: "Quantum Genesis Canvas #04", ref: "0xe3b0...b855", status: "VERIFIED", path: "/assets/asset-101" },
-    { type: "Creator", title: "Elena Vance (@cyber_artisan)", ref: "0x71C7...89A2", status: "VERIFIED CREATOR", path: "/creators/creator-1" },
-    { type: "Proof", title: "Proof Record #OC-891042", ref: "Arbitrum Sepolia Block #948102", status: "IMMUTABLE", path: "/verify" },
-];
+type Result = { type: "Asset" | "Creator"; title: string; ref: string; status: string; path: string };
 
 export function ExploreSearchFilter() {
     const [query, setQuery] = useState("");
     const [activeFilter, setActiveFilter] = useState("All");
+    const [results, setResults] = useState<Result[]>([]);
+    const [searched, setSearched] = useState(false);
 
-    const filteredResults = DEMO_SEARCH_RESULTS.filter((item) => {
-        const matchesQuery = query === "" || item.title.toLowerCase().includes(query.toLowerCase()) || item.ref.toLowerCase().includes(query.toLowerCase());
-        const matchesFilter = activeFilter === "All" || item.type.toLowerCase() === activeFilter.toLowerCase() || (activeFilter === "Verified" && item.status.includes("VERIFIED"));
-        return matchesQuery && matchesFilter;
+    useEffect(() => {
+        const q = query.trim();
+        if (q.length < 2) {
+            queueMicrotask(() => setSearched(false));
+            return;
+        }
+        let isCurrent = true;
+        const timer = setTimeout(() => {
+            search(q)
+                .then((data) => {
+                    if (!isCurrent) return;
+                    const assetResults: Result[] = data.assets.map((a) => ({
+                        type: "Asset",
+                        title: a.title,
+                        ref: `by ${a.creator.displayName}`,
+                        status: "VERIFIED",
+                        path: `/assets/${a.id}`,
+                    }));
+                    const creatorResults: Result[] = data.creators.map((c) => ({
+                        type: "Creator",
+                        title: c.displayName,
+                        ref: c.walletAddress,
+                        status: "CREATOR",
+                        path: `/creators/${c.id}`,
+                    }));
+                    setResults([...assetResults, ...creatorResults]);
+                    setSearched(true);
+                })
+                .catch(() => {
+                    if (isCurrent) {
+                        setResults([]);
+                        setSearched(true);
+                    }
+                });
+        }, 300);
+        return () => {
+            isCurrent = false;
+            clearTimeout(timer);
+        };
+    }, [query]);
+
+    const filteredResults = results.filter((item) => {
+        if (activeFilter === "All") return true;
+        if (activeFilter === "Assets") return item.type === "Asset";
+        if (activeFilter === "Creators") return item.type === "Creator";
+        if (activeFilter === "Verified") return item.type === "Asset";
+        return true;
     });
 
     return (
@@ -43,7 +85,7 @@ export function ExploreSearchFilter() {
                             type="text"
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Search assets, creator handles, wallet addresses, or SHA-256 hashes..."
+                            placeholder="Search assets or creator names (2+ characters)..."
                             className="flex-1 bg-transparent py-3.5 px-2 text-sm text-white placeholder-zinc-500 focus:outline-none font-mono"
                         />
 
@@ -76,7 +118,7 @@ export function ExploreSearchFilter() {
                     </div>
 
                     {/* Live Results Drawer */}
-                    {query.trim().length > 0 && (
+                    {searched && (
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}

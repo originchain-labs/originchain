@@ -7,7 +7,6 @@ import { BlockchainConceptsGrid } from "@/components/explore/BlockchainConceptsG
 import { AssetExplorerSection } from "@/components/explore/AssetExplorerSection";
 import { ProofTransformationVisual } from "@/components/explore/ProofTransformationVisual";
 import { VerificationPreviewCard } from "@/components/explore/VerificationPreviewCard";
-import { CreatorEcosystemGrid } from "@/components/explore/CreatorEcosystemGrid";
 import { BlockchainNetworkCenterpiece } from "@/components/explore/BlockchainNetworkCenterpiece";
 import { ProtocolPillarsSection } from "@/components/explore/ProtocolPillarsSection";
 import { ExploreSearchFilter } from "@/components/explore/ExploreSearchFilter";
@@ -49,8 +48,9 @@ export default function ExplorePage() {
                 {/* 09 — VERIFICATION PREVIEW */}
                 <VerificationPreviewCard />
 
-                {/* 10 — CREATOR ECOSYSTEM */}
-                <CreatorEcosystemGrid />
+                {/* 10 — CREATOR ECOSYSTEM: omitted, no real "browse/list creators" backend
+                     capability exists to back this section honestly (see DiscoverCreatorsGrid
+                     fix for the same constraint) */}
 
                 {/* 11 — RECENT ACTIVITY FEED */}
                 <RecentActivityTimeline />

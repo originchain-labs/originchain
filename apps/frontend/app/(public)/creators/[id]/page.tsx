@@ -64,7 +64,7 @@ export default async function CreatorProfilePage({
                 <CreationsGrid assets={assets} />
 
                 {/* 06 — TIMELINE */}
-                <CreatorTimeline />
+                <CreatorTimeline assets={assets} />
 
                 {/* 07 — TRUST INDICATORS */}
                 <CreatorTrustSection assetCount={assets.length} reviewCount={reputation?.reviewCount ?? 0} />
