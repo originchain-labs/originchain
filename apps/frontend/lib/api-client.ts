@@ -390,6 +390,24 @@ export async function updateOrganization(orgId: string, data: { name?: string },
     }
 }
 
+export async function search(q: string) {
+    try {
+        const res = await fetch(`${API_URL}/api/v1/search?q=${encodeURIComponent(q)}`);
+        if (!res.ok) throw new Error("Search failed");
+        return await res.json() as Promise<{
+            assets: typeof FALLBACK_ASSETS;
+            creators: { id: string; displayName: string; walletAddress: string }[];
+        }>;
+    } catch {
+        return {
+            assets: FALLBACK_ASSETS,
+            creators: [
+                { id: "creator-demo-1", displayName: "Aria Sterling (@synth_wave)", walletAddress: "0x71C7248d72CBC69A91aD58Db273315e8849bFFed" },
+            ],
+        };
+    }
+}
+
 export async function listCreators() {
     try {
         const res = await fetch(`${API_URL}/api/v1/creators`);
