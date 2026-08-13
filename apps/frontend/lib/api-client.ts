@@ -368,17 +368,18 @@ export async function getMyOrganizations(token: string) {
     }
 }
 
-export async function createOrganization(data: { name: string }, token: string) {
+export async function createOrganization(data: string | { name: string }, token: string) {
+    const nameStr = typeof data === "string" ? data : data.name;
     try {
         const res = await fetch(`${API_URL}/api/v1/organizations`, {
             method: "POST",
             headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-            body: JSON.stringify(data),
+            body: JSON.stringify({ name: nameStr }),
         });
         if (!res.ok) throw new Error("Failed to create organization");
         return await res.json();
     } catch {
-        return { id: "org-1", name: data.name };
+        return { id: "org-1", name: nameStr };
     }
 }
 
