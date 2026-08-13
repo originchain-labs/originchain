@@ -7,12 +7,12 @@ export default function AdminPage() {
     const { analytics, isAdmin, loading, error } = useAdmin();
 
     if (loading) {
-        return <div className="p-6 text-sm text-zinc-500">Loading admin analytics…</div>;
+        return <div className="px-6 pb-6 pt-24 text-sm text-zinc-500">Loading admin analytics…</div>;
     }
 
     return (
         <RequireAuth>
-            <div className="mx-auto max-w-4xl p-6">
+            <div className="mx-auto max-w-4xl px-6 pb-6 pt-24">
                 <h1 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
                     Admin Analytics
                 </h1>

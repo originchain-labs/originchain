@@ -17,6 +17,6 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     setChecked(true);
   }, [router]);
 
-  if (!checked) return <p className="p-6 text-sm text-zinc-500">Checking authentication…</p>;
+  if (!checked) return <p className="px-6 pb-6 pt-24 text-sm text-zinc-500">Checking authentication…</p>;
   return <>{children}</>;
 }

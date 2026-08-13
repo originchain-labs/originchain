@@ -14,7 +14,7 @@ export default function UploadAssetPage() {
     const { step, error, preview, selectAndPrepare, confirmAndRegister, retryConfirmation } = useAsset();
 
     return (
-        <div className="mx-auto max-w-xl p-6">
+        <div className="mx-auto max-w-xl px-6 pb-6 pt-24">
             <h1 className="mb-4 text-xl font-semibold">Register an Asset</h1>
 
             {step === "idle" && (
