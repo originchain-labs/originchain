@@ -28,69 +28,6 @@ const CATEGORIES = [
     "Physical Provenance",
 ];
 
-const MOCK_EXPLORE_ASSETS: Asset[] = [
-    {
-        id: "asset-101",
-        title: "Quantum Genesis Generative Canvas",
-        description: "High-resolution generative matrix sealed with SHA-256 origin proof.",
-        ipfsCid: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
-        creator: { walletAddress: "0x71C7...89A2", handle: "cyber_artisan" },
-        tags: ["Digital Artwork", "Generative", "Proof-of-Origin"],
-        category: "Digital Artwork",
-        reputationScore: 99,
-    },
-    {
-        id: "asset-102",
-        title: "Arbitrum Swarm Smart Contract Spec",
-        description: "Formal specification document for multi-agent autonomous contract execution.",
-        ipfsCid: "QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG",
-        creator: { walletAddress: "0x89C4...44D1", handle: "solidity_master" },
-        tags: ["Smart Contracts", "AI", "Document & IP"],
-        category: "Document & IP",
-        reputationScore: 96,
-    },
-    {
-        id: "asset-103",
-        title: "Sub-Zero Synthesizer Audio Stem",
-        description: "Original uncompressed audio stem registered with IPFS CID timestamp payload.",
-        ipfsCid: "QmZTR5bcpQDogVKTBABzM43WgP4gBum731nsktzn3s6hXY",
-        creator: { walletAddress: "0x3A91...1F82", handle: "synth_wave" },
-        tags: ["Creative Audio", "Soundtrack", "Music-IP"],
-        category: "Creative Audio",
-        reputationScore: 100,
-    },
-    {
-        id: "asset-104",
-        title: "Luxury Watch Chronograph Physical Passport",
-        description: "Physical asset origin certificate backed by NFC chip and Arbitrum Sepolia log.",
-        ipfsCid: "QmPZ9gcCEpqKTo6aq61g2nXGUhM4iCL3ewB6LDXZvG7uKm",
-        creator: { walletAddress: "0x4F12...99B0", handle: "horology_vault" },
-        tags: ["Physical Provenance", "Luxury", "NFC Badge"],
-        category: "Physical Provenance",
-        reputationScore: 98,
-    },
-    {
-        id: "asset-105",
-        title: "Decentralized AI Agent Model License",
-        description: "Open provenance license certificate mapping model weights to creator signatures.",
-        ipfsCid: "QmUv7aB9KzTqN8xY1L3mM5nR6pC4wE2vG8bF7dH1jK9sW0",
-        creator: { walletAddress: "0x90B3...12A8", handle: "ai_researcher" },
-        tags: ["Certificate", "Licensing", "OpenAI-IP"],
-        category: "Certificate",
-        reputationScore: 97,
-    },
-    {
-        id: "asset-106",
-        title: "Zero-Knowledge Rollup Architecture Blueprint",
-        description: "Technical product blueprint for state channel compression and verifiable proofs.",
-        ipfsCid: "QmR2d5F7jN9xW1L3mM5nR6pC4wE2vG8bF7dH1jK9sW0aBc",
-        creator: { walletAddress: "0x12D4...88F9", handle: "zk_architect" },
-        tags: ["Product Specification", "ZK-Rollup", "Architecture"],
-        category: "Product Specification",
-        reputationScore: 95,
-    },
-];
-
 export function AssetExplorerSection() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [assets, setAssets] = useState<Asset[]>([]);
@@ -101,13 +38,11 @@ export function AssetExplorerSection() {
         async function fetchAssets() {
             try {
                 const res = await listAssets({ page: 1 });
-                if (isMounted && res && Array.isArray(res.items) && res.items.length > 0) {
-                    setAssets(res.items);
-                } else if (isMounted) {
-                    setAssets(MOCK_EXPLORE_ASSETS);
+                if (isMounted && res && Array.isArray(res.results)) {
+                    setAssets(res.results);
                 }
             } catch {
-                if (isMounted) setAssets(MOCK_EXPLORE_ASSETS);
+                if (isMounted) setAssets([]);
             } finally {
                 if (isMounted) setLoading(false);
             }
@@ -168,6 +103,8 @@ export function AssetExplorerSection() {
                             <div key={n} className="h-80 rounded-2xl bg-slate-900/40 border border-white/5 animate-pulse" />
                         ))}
                     </div>
+                ) : filteredAssets.length === 0 ? (
+                    <p className="text-sm text-zinc-400 font-mono">No assets registered yet.</p>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {filteredAssets.map((asset, idx) => (
@@ -186,9 +123,6 @@ export function AssetExplorerSection() {
                                             <ShieldCheck className="w-3.5 h-3.5" />
                                             <span>✓ VERIFIED ORIGIN</span>
                                         </div>
-                                        <span className="text-xs font-mono font-bold text-cyan-300">
-                                            {asset.reputationScore ?? 98}/100 SCORE
-                                        </span>
                                     </div>
 
                                     {/* Title & Desc */}
