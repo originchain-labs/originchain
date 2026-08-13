@@ -176,3 +176,4 @@ CLAUDE.md
 # Prisma generated client
 **/generated/prisma/
 .vercel
+.env*
