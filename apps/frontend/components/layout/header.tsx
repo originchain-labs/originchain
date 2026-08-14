@@ -3,16 +3,42 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAuth } from "@/hooks/useAuth";
-import { ShieldCheck, Menu, X, Hexagon, ArrowRight } from "lucide-react";
+import { getCreatorByWallet } from "@/lib/api-client";
+import { ShieldCheck, Menu, X, Hexagon, ArrowRight, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Header() {
     const { isConnected, isAuthenticated, isSigningIn, error, signIn } = useAuth();
+    const { address } = useAccount();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [resolvedCreator, setResolvedCreator] = useState<{ address: string; id: string } | null>(null);
     const pathname = usePathname();
+
+    // Resolve the signed-in creator's own id by wallet address rather than
+    // trusting session.creatorId — that field is undefined for a first-time
+    // wallet (auth/verify has no id to return until a Creator row exists),
+    // and never gets refreshed after their first asset registration.
+    useEffect(() => {
+        if (!isAuthenticated || !address) return;
+        let cancelled = false;
+        getCreatorByWallet(address)
+            .then((creator) => {
+                if (!cancelled && creator) setResolvedCreator({ address, id: creator.id });
+            })
+            .catch(() => {});
+        return () => {
+            cancelled = true;
+        };
+    }, [isAuthenticated, address]);
+
+    // Guards against a stale id from a previously signed-in wallet flashing
+    // before the effect above re-resolves for the newly connected address.
+    const myCreatorId =
+        isAuthenticated && address && resolvedCreator?.address === address ? resolvedCreator.id : null;
 
     useEffect(() => {
         const handleScroll = () => {
@@ -83,6 +109,15 @@ export function Header() {
 
                 {/* Right: Wallet Connect & Auth */}
                 <div className="hidden sm:flex items-center gap-3">
+                    {myCreatorId && (
+                        <Link
+                            href={`/creators/${myCreatorId}`}
+                            className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all"
+                        >
+                            <User className="w-3.5 h-3.5" />
+                            My Assets
+                        </Link>
+                    )}
                     {isConnected && !isAuthenticated && (
                         <button
                             onClick={signIn}
@@ -134,6 +169,16 @@ export function Header() {
                                 </Link>
                             ))}
                             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
+                                {myCreatorId && (
+                                    <Link
+                                        href={`/creators/${myCreatorId}`}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-zinc-300 hover:text-cyan-300 hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/20 transition-all"
+                                    >
+                                        <User className="w-4 h-4" />
+                                        My Assets
+                                    </Link>
+                                )}
                                 {isConnected && !isAuthenticated && (
                                     <button
                                         onClick={signIn}
